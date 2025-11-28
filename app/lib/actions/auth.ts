@@ -6,6 +6,7 @@ import { FormState, AuthFormSchema } from "../definitions";
 import bcrypt from "bcrypt";
 import { createSession, deleteSession } from "../session";
 import { ObjectId } from "mongodb";
+import { sendOtpEmail } from "../mail/sendVerificationEmail";
 
 export async function signup(state: FormState, formData: FormData) {
   const validatedFields = AuthFormSchema.safeParse({
@@ -71,6 +72,7 @@ export async function signin(state: FormState, formData: FormData) {
   const idString: string = id.toString();
 
   await createSession(idString);
+  sendOtpEmail(email, "1234");
 
   redirect("/");
 }
