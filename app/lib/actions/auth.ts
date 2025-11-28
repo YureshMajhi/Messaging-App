@@ -40,7 +40,7 @@ export async function signup(state: FormState, formData: FormData) {
       .collection("users")
       .findOneAndUpdate({ email }, { $set: { otp, otpExpiry } });
     sendOtpEmail(email, otp);
-    return { message: "Ok" };
+    return { message: existing._id.toString() };
   }
 
   await db.collection("users").insertOne({
@@ -54,7 +54,7 @@ export async function signup(state: FormState, formData: FormData) {
   });
 
   sendOtpEmail(email, otp);
-  return { message: "Ok" };
+  return { message: "OK" };
 }
 
 const signinFormSchema = AuthFormSchema.omit({ name: true });
@@ -94,4 +94,32 @@ export async function signin(state: FormState, formData: FormData) {
 export async function signout() {
   await deleteSession();
   redirect("/login");
+}
+
+export async function verifyOtp(req: { otp: number; id: string }) {
+  const { otp, id } = req;
+
+  const client = await clientPromise;
+  const db = client.db("authDB");
+
+  const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
+  if (!user) {
+    return { error: "USER_DOESNOT_EXIST" };
+  }
+
+  const currentTime = Date.now();
+
+  if (currentTime > user.otpExpiry) {
+    return { error: "OTP_EXPIRED" };
+  }
+
+  if (otp === user.otp) {
+    await db
+      .collection("users")
+      .findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } }
+      );
+    return { message: "OK" };
+  }
 }

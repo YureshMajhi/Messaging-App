@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { signup } from "../lib/actions/auth";
+import { useActionState, useState } from "react";
+import { signup, verifyOtp } from "../lib/actions/auth";
 
 export default function SignUp() {
   const [state, action, pending] = useActionState(signup, undefined);
@@ -34,7 +34,25 @@ export default function SignUp() {
             </div>
           )}
         </div>
-        '<button type="submit">Sign Up</button>
+        <button type="submit">Sign Up</button>
+      </form>
+
+      <form
+        action={async (formData: FormData) => {
+          const otpValue = formData.get("otp");
+          if (!otpValue) return;
+
+          const otp = Number(otpValue);
+          const id = state?.message; // or email
+
+          if (!id) return;
+
+          const result = await verifyOtp({ otp, id });
+          console.log(result);
+        }}
+      >
+        <input type="number" name="otp" placeholder="OTP" />
+        <button type="submit">Submit</button>
       </form>
     </>
   );
