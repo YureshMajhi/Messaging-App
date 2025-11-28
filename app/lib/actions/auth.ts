@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import { createSession, deleteSession } from "../session";
 import { ObjectId } from "mongodb";
 import { sendOtpEmail } from "../mail/sendVerificationEmail";
+import { randomInt } from "crypto";
 
 export async function signup(state: FormState, formData: FormData) {
   const validatedFields = AuthFormSchema.safeParse({
@@ -27,8 +28,19 @@ export async function signup(state: FormState, formData: FormData) {
   const db = client.db("authDB");
 
   const existing = await db.collection("users").findOne({ email });
-  if (existing) {
-    throw new Error("USER_ALREADY_EXISTS");
+  if (existing && existing.isVerified) {
+    return { error: "USER_ALREADY_EXISTS" };
+  }
+
+  const otp = randomInt(100000, 999999);
+  const otpExpiry = Date.now() + 1000 * 60 * 5;
+
+  if (existing && !existing.isVerified) {
+    await db
+      .collection("users")
+      .findOneAndUpdate({ email }, { $set: { otp, otpExpiry } });
+    sendOtpEmail(email, otp);
+    return { message: "Ok" };
   }
 
   await db.collection("users").insertOne({
@@ -36,9 +48,13 @@ export async function signup(state: FormState, formData: FormData) {
     password: hashedPassword,
     name,
     createdAt: date,
+    otp,
+    otpExpiry,
+    isVerified: false,
   });
 
-  redirect("/login");
+  sendOtpEmail(email, otp);
+  return { message: "Ok" };
 }
 
 const signinFormSchema = AuthFormSchema.omit({ name: true });
@@ -72,8 +88,6 @@ export async function signin(state: FormState, formData: FormData) {
   const idString: string = id.toString();
 
   await createSession(idString);
-  sendOtpEmail(email, "1234");
-
   redirect("/");
 }
 
