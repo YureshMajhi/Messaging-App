@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import clientPromise from "../database/mongodb";
-import { FormState, AuthFormSchema } from "../definitions";
+import { FormState, AuthFormSchema, OtpFormSchema } from "../definitions";
 import bcrypt from "bcrypt";
 import { createSession, deleteSession } from "../session";
 import { ObjectId } from "mongodb";
@@ -28,6 +28,7 @@ export async function signup(state: FormState, formData: FormData) {
   const db = client.db("authDB");
 
   const existing = await db.collection("users").findOne({ email });
+
   if (existing && existing.isVerified) {
     return { error: "USER_ALREADY_EXISTS" };
   }
@@ -40,7 +41,7 @@ export async function signup(state: FormState, formData: FormData) {
       .collection("users")
       .findOneAndUpdate({ email }, { $set: { otp, otpExpiry } });
     sendOtpEmail(email, otp);
-    return { message: existing._id.toString() };
+    return { message: "OK", email };
   }
 
   await db.collection("users").insertOne({
@@ -54,7 +55,7 @@ export async function signup(state: FormState, formData: FormData) {
   });
 
   sendOtpEmail(email, otp);
-  return { message: "OK" };
+  return { message: "OK", email };
 }
 
 const signinFormSchema = AuthFormSchema.omit({ name: true });
@@ -96,13 +97,22 @@ export async function signout() {
   redirect("/login");
 }
 
-export async function verifyOtp(req: { otp: number; id: string }) {
-  const { otp, id } = req;
+export async function verifyOtp(state: FormState, formData: FormData) {
+  const validatedFields = OtpFormSchema.safeParse({
+    email: formData.get("email"),
+    otp: formData.get("otp"),
+  });
+
+  if (!validatedFields.success) {
+    return { errors: validatedFields.error.flatten().fieldErrors };
+  }
+
+  const { email, otp } = validatedFields.data;
 
   const client = await clientPromise;
   const db = client.db("authDB");
 
-  const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
+  const user = await db.collection("users").findOne({ email });
   if (!user) {
     return { error: "USER_DOESNOT_EXIST" };
   }
@@ -113,13 +123,15 @@ export async function verifyOtp(req: { otp: number; id: string }) {
     return { error: "OTP_EXPIRED" };
   }
 
-  if (otp === user.otp) {
+  if (Number(otp) === user.otp) {
     await db
       .collection("users")
       .findOneAndUpdate(
-        { _id: new ObjectId(id) },
+        { email },
         { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } }
       );
+
+    redirect("/login");
     return { message: "OK" };
   }
 }

@@ -29,7 +29,7 @@ export default function login() {
             </div>
           )}
         </div>
-        '<button type="submit">Login</button>
+        <button type="submit">Login</button>
       </form>
     </>
   );

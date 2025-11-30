@@ -1,31 +1,37 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { signup, verifyOtp } from "../lib/actions/auth";
 
 export default function SignUp() {
-  const [state, action, pending] = useActionState(signup, undefined);
+  const [formState, formAction, pending] = useActionState(signup, undefined);
+  const [otpState, otpAction] = useActionState(verifyOtp, undefined);
+
   return (
     <>
-      <form action={action}>
+      <form action={formAction}>
         <div>
           <label htmlFor="name">Name</label>
           <input type="text" id="name" name="name" placeholder="Name" />
-          {state?.errors?.name && <p className="text-red-500">{state.errors.name}</p>}
+          {formState?.errors?.name && (
+            <p className="text-red-500">{formState.errors.name}</p>
+          )}
         </div>
         <div>
           <label htmlFor="email">Email</label>
           <input type="email" id="email" name="email" placeholder="Email" />
-          {state?.errors?.email && <p className="text-red-500">{state.errors.email}</p>}
+          {formState?.errors?.email && (
+            <p className="text-red-500">{formState.errors.email}</p>
+          )}
         </div>
         <div>
           <label htmlFor="password">Password</label>
           <input type="text" id="password" name="password" placeholder="Password" />
-          {state?.errors?.password && (
+          {formState?.errors?.password && (
             <div>
               <p className="text-red-500">Password must:</p>
               <ul>
-                {state.errors.password.map((error) => (
+                {formState.errors.password.map((error) => (
                   <li className="text-red-500" key={error}>
                     - {error}
                   </li>
@@ -37,23 +43,40 @@ export default function SignUp() {
         <button type="submit">Sign Up</button>
       </form>
 
-      <form
-        action={async (formData: FormData) => {
-          const otpValue = formData.get("otp");
-          if (!otpValue) return;
+      {formState?.email && formState.message === "OK" && (
+        <form action={otpAction}>
+          <div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formState.email}
+              onChange={() => {}}
+            />
+            {otpState?.errors?.email && (
+              <p className="text-red-500">{otpState.errors.email}</p>
+            )}
+          </div>
+          <div>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="\d{6}"
+              id="email"
+              placeholder="Enter OTP"
+              name="otp"
+            />
+            {otpState?.errors?.otp &&
+              otpState?.errors?.otp.map((otp, i) => (
+                <p key={i} className="text-red-500">
+                  {otp}
+                </p>
+              ))}
+          </div>
 
-          const otp = Number(otpValue);
-          const id = state?.message; // or email
-
-          if (!id) return;
-
-          const result = await verifyOtp({ otp, id });
-          console.log(result);
-        }}
-      >
-        <input type="number" name="otp" placeholder="OTP" />
-        <button type="submit">Submit</button>
-      </form>
+          <button type="submit">Continue</button>
+        </form>
+      )}
     </>
   );
 }

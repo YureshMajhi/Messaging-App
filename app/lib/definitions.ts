@@ -14,12 +14,31 @@ export const AuthFormSchema = z.object({
     .trim(),
 });
 
+export const OtpFormSchema = z.object({
+  email: z.email({ error: "Something went wrong. Please try signing up again." }),
+  otp: z
+    .string()
+    .regex(/^\d+$/, { error: "Invalid OTP" })
+    .length(6, { error: "OTP must be atleast 6 characters long" }),
+});
+
 export type FormState =
   | {
       errors?: {
         name?: string[];
         email?: string[];
         password?: string[];
+      };
+      message?: string;
+      email?: string;
+    }
+  | undefined;
+
+export type OtpState =
+  | {
+      errors?: {
+        otp?: string[];
+        email?: string[];
       };
       message?: string;
     }
