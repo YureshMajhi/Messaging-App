@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { signup, verifyOtp } from "../lib/actions/auth";
+import Link from "next/link";
 
 export default function SignUp() {
   const [formState, formAction, pending] = useActionState(signup, undefined);
@@ -77,6 +78,13 @@ export default function SignUp() {
           <button type="submit">Continue</button>
         </form>
       )}
+
+      <div>
+        <p>Already have an account?</p>
+        <button>
+          <Link href={"/login"}>Log In</Link>
+        </button>
+      </div>
     </>
   );
 }

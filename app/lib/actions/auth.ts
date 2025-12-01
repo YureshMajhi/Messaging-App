@@ -76,19 +76,17 @@ export async function signin(state: FormState, formData: FormData) {
   const db = client.db("authDB");
 
   const user = await db.collection("users").findOne({ email });
-  if (!user) {
-    throw new Error("USER_DOESNOT_EXIST");
+  if (!user || !user.isVerified) {
+    return { error: "USER_DOESNOT_EXIST" };
   }
 
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
-    throw new Error("INVALID_PASSWORD");
+    return { error: "INVALID_PASSWORD" };
   }
 
-  const id: ObjectId = new ObjectId();
-  const idString: string = id.toString();
+  await createSession(user._id.toString());
 
-  await createSession(idString);
   redirect("/");
 }
 
@@ -132,6 +130,5 @@ export async function verifyOtp(state: FormState, formData: FormData) {
       );
 
     redirect("/login");
-    return { message: "OK" };
   }
 }

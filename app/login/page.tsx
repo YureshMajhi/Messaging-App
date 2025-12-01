@@ -2,9 +2,11 @@
 
 import { useActionState } from "react";
 import { signin } from "../lib/actions/auth";
+import Link from "next/link";
 
-export default function login() {
+export default function Login() {
   const [state, action, pending] = useActionState(signin, undefined);
+
   return (
     <>
       <form action={action}>
@@ -30,7 +32,15 @@ export default function login() {
           )}
         </div>
         <button type="submit">Login</button>
+        {state?.error && <p className="text-red-500">{state.error}</p>}
       </form>
+
+      <div>
+        <p>Don't have an account?</p>
+        <button>
+          <Link href={"/signup"}>Sign Up</Link>
+        </button>
+      </div>
     </>
   );
 }
