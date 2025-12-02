@@ -4,6 +4,8 @@ import clientPromise from "../database/mongodb";
 
 export async function searchUsers(query: string, currentPage: number) {
   try {
+    if (!query) return [];
+
     const client = await clientPromise;
     const db = client.db("authDB");
 
