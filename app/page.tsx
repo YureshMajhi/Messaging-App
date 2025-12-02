@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { signout } from "./lib/actions/auth";
 import { verifySession } from "./lib/dal";
 
@@ -7,6 +8,9 @@ export default async function Home() {
   return (
     <div>
       <div>chat app</div>
+      <div>
+        <Link href={"/dashboard"}>Go to Dashboard {">>"}</Link>
+      </div>
       <div>
         <button onClick={signout}>Log Out</button>
       </div>

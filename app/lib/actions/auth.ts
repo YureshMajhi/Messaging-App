@@ -70,29 +70,39 @@ export async function signin(state: FormState, formData: FormData) {
     return { errors: validatedFields.error.flatten().fieldErrors };
   }
 
-  const { email, password } = validatedFields.data;
+  try {
+    const { email, password } = validatedFields.data;
 
-  const client = await clientPromise;
-  const db = client.db("authDB");
+    const client = await clientPromise;
+    const db = client.db("authDB");
 
-  const user = await db.collection("users").findOne({ email });
-  if (!user || !user.isVerified) {
-    return { error: "USER_DOESNOT_EXIST" };
+    const user = await db.collection("users").findOne({ email });
+    if (!user || !user.isVerified) {
+      return { error: "USER_DOESNOT_EXIST" };
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return { error: "INVALID_PASSWORD" };
+    }
+
+    await createSession(user._id.toString());
+
+    redirect("/");
+  } catch (error) {
+    console.error(error);
+    return { error: "SOMETHING_WENT_WRONG" };
   }
-
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
-    return { error: "INVALID_PASSWORD" };
-  }
-
-  await createSession(user._id.toString());
-
-  redirect("/");
 }
 
 export async function signout() {
-  await deleteSession();
-  redirect("/login");
+  try {
+    await deleteSession();
+    redirect("/login");
+  } catch (error) {
+    console.error(error);
+    return { error: "SOMETHING_WENT_WRONG" };
+  }
 }
 
 export async function verifyOtp(state: FormState, formData: FormData) {
@@ -105,30 +115,35 @@ export async function verifyOtp(state: FormState, formData: FormData) {
     return { errors: validatedFields.error.flatten().fieldErrors };
   }
 
-  const { email, otp } = validatedFields.data;
+  try {
+    const { email, otp } = validatedFields.data;
 
-  const client = await clientPromise;
-  const db = client.db("authDB");
+    const client = await clientPromise;
+    const db = client.db("authDB");
 
-  const user = await db.collection("users").findOne({ email });
-  if (!user) {
-    return { error: "USER_DOESNOT_EXIST" };
-  }
+    const user = await db.collection("users").findOne({ email });
+    if (!user) {
+      return { error: "USER_DOESNOT_EXIST" };
+    }
 
-  const currentTime = Date.now();
+    const currentTime = Date.now();
 
-  if (currentTime > user.otpExpiry) {
-    return { error: "OTP_EXPIRED" };
-  }
+    if (currentTime > user.otpExpiry) {
+      return { error: "OTP_EXPIRED" };
+    }
 
-  if (Number(otp) === user.otp) {
-    await db
-      .collection("users")
-      .findOneAndUpdate(
-        { email },
-        { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } }
-      );
+    if (Number(otp) === user.otp) {
+      await db
+        .collection("users")
+        .findOneAndUpdate(
+          { email },
+          { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } }
+        );
 
-    redirect("/login");
+      redirect("/login");
+    }
+  } catch (error) {
+    console.error(error);
+    return { error: "SOMETHING_WENT_WRONG" };
   }
 }
