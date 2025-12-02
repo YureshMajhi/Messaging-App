@@ -87,22 +87,22 @@ export async function signin(state: FormState, formData: FormData) {
     }
 
     await createSession(user._id.toString());
-
-    redirect("/");
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
   }
+
+  redirect("/");
 }
 
 export async function signout() {
   try {
     await deleteSession();
-    redirect("/login");
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
   }
+  redirect("/login");
 }
 
 export async function verifyOtp(state: FormState, formData: FormData) {
@@ -139,11 +139,10 @@ export async function verifyOtp(state: FormState, formData: FormData) {
           { email },
           { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } }
         );
-
-      redirect("/login");
     }
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
   }
+  redirect("/login");
 }
