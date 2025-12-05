@@ -58,3 +58,5 @@ export type User = {
 export type UserTable = {
   users: User[];
 };
+
+export type FriendList = string[] | { error: string };

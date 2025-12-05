@@ -5,7 +5,7 @@ import { verifySession } from "../dal";
 import clientPromise from "../database/mongodb";
 import { ObjectId } from "mongodb";
 import { updateSession } from "../session";
-import { User } from "../definitions";
+import { FriendList, User } from "../definitions";
 
 export async function searchUsers(
   query: string,
@@ -64,11 +64,11 @@ export async function sendFriendRequest(receiverId: string) {
     if (friendRequestExists) {
       switch (friendRequestExists.status) {
         case "pending":
-          return { error: "Friend request is already sent." };
+          return { error: "FRIEND_REQUEST_HAS_ALREADY_BEEN_SENT" };
         case "accepted":
-          return { error: "Friend request is already accepted." };
+          return { error: "FRIEND_REQUEST_HAS_ALREADY_BEEN_ACCEPTED" };
         case "rejected":
-          return { error: "Friend request has already been rejected." };
+          return { error: "FRIEND_REQUEST_HAS_BEEN_REJECTED" };
       }
     }
 
@@ -79,6 +79,30 @@ export async function sendFriendRequest(receiverId: string) {
     });
 
     return { message: "Friend request sent to user successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: "SOMETHING_WENT_WRONG" };
+  }
+}
+
+export async function showFriends(userId: string): Promise<FriendList> {
+  try {
+    const client = await clientPromise;
+    const db = client.db("authDB");
+
+    const requests = await db
+      .collection("friendRequests")
+      .find({
+        status: "accepted",
+        $or: [{ senderId: userId }, { receiverId: userId }],
+      })
+      .toArray();
+
+    const mapped = requests.map((req) => {
+      return req.receiverId === userId ? req.senderId : req.receiverId;
+    });
+
+    return mapped;
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
