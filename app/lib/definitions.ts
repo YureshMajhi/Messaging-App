@@ -48,3 +48,13 @@ export type SessionPayload = {
   userId: string;
   expiresAt: Date;
 };
+
+export type User = {
+  _id: string;
+  name: string;
+  email: string;
+};
+
+export type UserTable = {
+  users: User[];
+};

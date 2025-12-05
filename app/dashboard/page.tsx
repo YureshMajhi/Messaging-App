@@ -1,4 +1,5 @@
 import { signout } from "../lib/actions/auth";
+import { searchUsers } from "../lib/actions/data";
 import { verifySession } from "../lib/dal";
 import Search from "../ui/search";
 import Table from "../ui/table";
@@ -15,11 +16,13 @@ export default async function Dashboard(props: {
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
 
+  const users = await searchUsers(query, currentPage, session.userId);
+
   return (
     <>
       <div>
         <Search />
-        <Table query={query} currentPage={currentPage} />
+        <Table users={users} />
         <div>
           <button onClick={signout}>Log Out</button>
         </div>
