@@ -46,6 +46,7 @@ export type OtpState =
 
 export type SessionPayload = {
   userId: string;
+  userName: string;
   expiresAt: Date;
 };
 

@@ -86,7 +86,7 @@ export async function signin(state: FormState, formData: FormData) {
       return { error: "INVALID_PASSWORD" };
     }
 
-    await createSession(user._id.toString());
+    await createSession(user._id.toString(), user.name);
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };

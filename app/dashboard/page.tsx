@@ -1,8 +1,14 @@
 import { signout } from "../lib/actions/auth";
-import { searchUsers, showFriends } from "../lib/actions/data";
+import {
+  acceptFriendRequest,
+  searchUsers,
+  showFriends,
+  showPendingRequests,
+} from "../lib/actions/data";
 import { verifySession } from "../lib/dal";
 import Search from "../ui/search";
 import Table from "../ui/table";
+import FriendRequests from "../components/FriendRequests";
 
 export default async function Dashboard(props: {
   searchParams?: Promise<{
@@ -18,19 +24,26 @@ export default async function Dashboard(props: {
 
   const users = await searchUsers(query, currentPage, session.userId);
   const friends = await showFriends(session.userId);
+  const pendingRequests = await showPendingRequests(session.userId);
 
   const friendList = "error" in friends ? [] : friends;
+  const pendingRequestsList = "error" in pendingRequests ? [] : pendingRequests;
 
   return (
     <>
       <div className="flex flex-col gap-8">
         <div>
+          <h2>Welcome {session?.userName}</h2>
           <Search />
           <Table users={users} />
           <div>
             <button onClick={signout}>Log Out</button>
           </div>
         </div>
+        <div className="flex gap-2"></div>
+
+        <FriendRequests pendingRequestsList={pendingRequestsList} />
+
         <div className="flex gap-2">
           <div>
             <div>friends</div>
@@ -38,7 +51,6 @@ export default async function Dashboard(props: {
               <div key={friend}>{friend}</div>
             ))}
           </div>
-          <div>Sent Requests</div>
         </div>
       </div>
     </>

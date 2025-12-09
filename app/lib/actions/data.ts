@@ -85,6 +85,54 @@ export async function sendFriendRequest(receiverId: string) {
   }
 }
 
+export async function acceptFriendRequest(senderId: string) {
+  const session = await verifySession();
+  if (!session) redirect("/login");
+
+  await updateSession();
+
+  try {
+    const client = await clientPromise;
+    const db = client.db("authDB");
+
+    const sender = await db.collection("users").findOne({
+      _id: new ObjectId(senderId),
+    });
+    if (!sender) {
+      return { error: "USER_DOESNOT_EXIST" };
+    }
+
+    const friendRequestExists = await db.collection("friendRequests").findOne({
+      senderId,
+      receiverId: session.userId,
+    });
+
+    if (friendRequestExists) {
+      switch (friendRequestExists.status) {
+        case "pending":
+          await db.collection("friendRequests").updateOne(
+            {
+              senderId,
+              receiverId: session.userId,
+            },
+            { $set: { status: "accepted" } }
+          );
+          return { message: "Friend request accepted successfully." };
+
+        case "accepted":
+          return { error: "FRIEND_REQUEST_HAS_ALREADY_BEEN_ACCEPTED" };
+        case "rejected":
+          return { error: "FRIEND_REQUEST_HAS_BEEN_REJECTED" };
+      }
+    }
+
+    return { message: "Friend request sent to user successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: "SOMETHING_WENT_WRONG" };
+  }
+}
+
 export async function showFriends(userId: string): Promise<FriendList> {
   try {
     const client = await clientPromise;
@@ -104,6 +152,29 @@ export async function showFriends(userId: string): Promise<FriendList> {
 
     return mapped;
   } catch (error) {
+    console.error(error);
+    return { error: "SOMETHING_WENT_WRONG" };
+  }
+}
+
+export async function showPendingRequests(userId: string): Promise<FriendList> {
+  try {
+    const client = await clientPromise;
+    const db = client.db("authDB");
+
+    const requests = await db
+      .collection("friendRequests")
+      .find({
+        status: "pending",
+        receiverId: userId,
+      })
+      .map((req) => req.senderId)
+      .toArray();
+
+    return requests;
+  } catch (error) {
+    const client = await clientPromise;
+    const db = client.db("authDB");
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
   }
