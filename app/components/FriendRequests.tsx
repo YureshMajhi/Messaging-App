@@ -8,7 +8,7 @@ export default function FriendRequests({
 }: {
   pendingRequestsList: string[];
 }) {
-  if (!pendingRequestsList) return;
+  if (pendingRequestsList?.length === 0) return;
 
   const [isPending, startTransition] = useTransition();
 

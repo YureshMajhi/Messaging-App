@@ -1,10 +1,5 @@
 import { signout } from "../lib/actions/auth";
-import {
-  acceptFriendRequest,
-  searchUsers,
-  showFriends,
-  showPendingRequests,
-} from "../lib/actions/data";
+import { searchUsers, showFriends, showPendingRequests } from "../lib/actions/data";
 import { verifySession } from "../lib/dal";
 import Search from "../ui/search";
 import Table from "../ui/table";
@@ -40,7 +35,6 @@ export default async function Dashboard(props: {
             <button onClick={signout}>Log Out</button>
           </div>
         </div>
-        <div className="flex gap-2"></div>
 
         <FriendRequests pendingRequestsList={pendingRequestsList} />
 
