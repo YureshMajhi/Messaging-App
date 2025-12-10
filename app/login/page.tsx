@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { signin } from "../lib/actions/auth";
 import {
   Card,
@@ -17,46 +17,44 @@ import logoUrl from "@/assets/Dalla Dalli Logo.jpeg";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function Login() {
   const [state, action, pending] = useActionState(signin, undefined);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state?.errors) {
+      const allErrors = Object.values(state.errors).flat();
+      const firstError = allErrors[0];
+
+      toast({
+        title: "Error",
+        description: firstError,
+        variant: "destructive",
+      });
+
+      return;
+    }
+
+    if (state?.error) {
+      toast({
+        title: "Error",
+        description: state.error,
+        variant: "destructive",
+      });
+    }
+  }, [state, toast]);
 
   return (
     <>
-      {/* <form action={action}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Email" />
-          {state?.errors?.email && <p className="text-red-500">{state.errors.email}</p>}
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input type="text" id="password" name="password" placeholder="Password" />
-          {state?.errors?.password && (
-            <div>
-              <p className="text-red-500">Password must:</p>
-              <ul>
-                {state.errors.password.map((error) => (
-                  <li className="text-red-500" key={error}>
-                    - {error}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-        <button type="submit">Login</button>
-        {state?.error && <p className="text-red-500">{state.error}</p>}
-      </form>
-
-      <div>
-        <p>Don't have an account?</p>
-        <button>
-          <Link href={"/signup"}>Sign Up</Link>
-        </button>
-      </div> */}
+      <Toaster />
 
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
@@ -84,6 +82,8 @@ export default function Login() {
                   name="email"
                   autoComplete="email"
                   data-testid="input-email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -103,10 +103,11 @@ export default function Login() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    // value={password}
-                    // onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
                     data-testid="input-password"
+                    name="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <Button
                     type="button"
