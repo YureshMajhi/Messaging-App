@@ -11,16 +11,17 @@ import { randomInt } from "crypto";
 
 export async function signup(state: FormState, formData: FormData) {
   const validatedFields = AuthFormSchema.safeParse({
-    name: formData.get("name"),
+    username: formData.get("username"),
     email: formData.get("email"),
     password: formData.get("password"),
+    confirmPassword: formData.get("confirm-password"),
   });
 
   if (!validatedFields.success) {
     return { errors: validatedFields.error.flatten().fieldErrors };
   }
 
-  const { name, email, password } = validatedFields.data;
+  const { username, email, password } = validatedFields.data;
   const hashedPassword = await bcrypt.hash(password, 10);
   const date = new Date().toISOString().split("T")[0];
 
@@ -47,7 +48,7 @@ export async function signup(state: FormState, formData: FormData) {
   await db.collection("users").insertOne({
     email,
     password: hashedPassword,
-    name,
+    username,
     createdAt: date,
     otp,
     otpExpiry,
@@ -58,7 +59,7 @@ export async function signup(state: FormState, formData: FormData) {
   return { message: "OK", email };
 }
 
-const signinFormSchema = AuthFormSchema.omit({ name: true });
+const signinFormSchema = AuthFormSchema.omit({ username: true });
 
 export async function signin(state: FormState, formData: FormData) {
   const validatedFields = signinFormSchema.safeParse({
@@ -140,9 +141,9 @@ export async function verifyOtp(state: FormState, formData: FormData) {
           { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } }
         );
     }
+    return { message: "OK" };
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
   }
-  redirect("/login");
 }
