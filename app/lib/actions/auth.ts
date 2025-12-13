@@ -59,7 +59,7 @@ export async function signup(state: FormState, formData: FormData) {
   return { message: "OK", email };
 }
 
-const signinFormSchema = AuthFormSchema.omit({ username: true });
+const signinFormSchema = AuthFormSchema.omit({ username: true, confirmPassword: true });
 
 export async function signin(state: FormState, formData: FormData) {
   const validatedFields = signinFormSchema.safeParse({
