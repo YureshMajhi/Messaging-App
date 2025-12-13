@@ -107,7 +107,7 @@ export default function OtpModal({
     if (result?.message) {
       toast({
         title: "Success",
-        description: result.message,
+        description: "Account successfully verified. Please login In to continue",
         variant: "default",
       });
     }
@@ -138,7 +138,7 @@ export default function OtpModal({
             </div>
           </div>
 
-          <form action={otpAction} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div className="flex justify-between gap-2 sm:gap-3">
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <input
