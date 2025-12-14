@@ -28,7 +28,7 @@ export async function searchUsers(
           { email: { $regex: query, $options: "i" } },
         ],
       })
-      .project({ _id: 1, name: 1, email: 1 })
+      .project({ _id: 1, username: 1, email: 1 })
       .toArray();
 
     const userList = users.map((user) => ({ ...user, _id: user._id.toString() }));

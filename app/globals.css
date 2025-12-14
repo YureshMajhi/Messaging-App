@@ -36,6 +36,8 @@
   --accent-foreground: 20 30% 15%;
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 0% 98%;
+  --success: 120 60% 45%;
+  --success-foreground: 120 50% 98%;
   --input: 20 15% 75%;
   --ring: 15 45% 45%;
   --chart-1: 15 45% 45%;
@@ -102,6 +104,12 @@
     from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) /
       alpha
   );
+
+  /* Fallback for older browsers */
+  --success-border: hsl(var(--success));
+  --success-border: hsl(
+    from hsl(var(--success)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 }
 
 .dark {
@@ -137,6 +145,8 @@
   --accent-foreground: 20 15% 92%;
   --destructive: 0 80% 42%;
   --destructive-foreground: 0 0% 98%;
+  --success: 120 60% 45%;
+  --success-foreground: 120 50% 98%;
   --input: 20 10% 28%;
   --ring: 10 50% 65%;
   --chart-1: 10 50% 65%;
@@ -197,6 +207,12 @@
     from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) /
       alpha
   );
+
+  /* Fallback for older browsers */
+  --success-border: hsl(var(--success));
+  --success-border: hsl(
+    from hsl(var(--success)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+  );
 }
 
 @layer base {
@@ -242,21 +258,6 @@
     pointer-events: none;
   }
 
-  /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
-   * buttons/badges can remove the automatic brightness adjustment on interactions
-   * and program their own. */
-  .no-default-hover-elevate {
-  }
-
-  .no-default-active-elevate {
-  }
-
-  /**
-   * Toggleable backgrounds go behind the content. Hoverable/active goes on top.
-   * This way they can stack/compound. Both will overlap the parent's borders!
-   * So borders will be automatically adjusted both on toggle, and hover/active,
-   * and they will be compounded.
-   */
   .toggle-elevate::before,
   .toggle-elevate-2::before {
     content: "";

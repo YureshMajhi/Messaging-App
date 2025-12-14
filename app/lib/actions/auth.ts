@@ -5,7 +5,6 @@ import clientPromise from "../database/mongodb";
 import { FormState, AuthFormSchema, OtpFormSchema } from "../definitions";
 import bcrypt from "bcrypt";
 import { createSession, deleteSession } from "../session";
-import { ObjectId } from "mongodb";
 import { sendOtpEmail } from "../mail/sendVerificationEmail";
 import { randomInt } from "crypto";
 

@@ -30,7 +30,7 @@ export default function Table({ users }: UserTable) {
       <tbody>
         {users?.map((user) => (
           <tr key={user._id.toString()}>
-            <td>{user.name}</td>
+            <td>{user.username}</td>
             <td>
               <button onClick={() => handleClick(user._id)}>Send Friend Request</button>
             </td>
