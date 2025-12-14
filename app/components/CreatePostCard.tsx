@@ -1,18 +1,16 @@
-import { useState, useRef } from 'react';
-import { Image, X, Loader2 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/context/AuthContext';
+import { useState, useRef } from "react";
+import { Image, X, Loader2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreatePostCardProps {
   onPost?: (content: string, imageUrl?: string) => void;
 }
 
 export default function CreatePostCard({ onPost }: CreatePostCardProps) {
-  const { user } = useAuth();
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,18 +29,18 @@ export default function CreatePostCard({ onPost }: CreatePostCardProps) {
   const removeImage = () => {
     setImagePreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const handlePost = async () => {
     if (!content.trim() && !imagePreview) return;
-    
+
     setIsPosting(true);
     // todo: remove mock functionality
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     onPost?.(content, imagePreview || undefined);
-    setContent('');
+    setContent("");
     setImagePreview(null);
     setIsPosting(false);
   };
@@ -52,8 +50,12 @@ export default function CreatePostCard({ onPost }: CreatePostCardProps) {
       <CardContent className="p-4">
         <div className="flex gap-3">
           <Avatar className="h-10 w-10 flex-shrink-0">
-            <AvatarImage src={user?.avatarUrl || undefined} alt={user?.displayName} />
-            <AvatarFallback>{user?.displayName?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+            {/* <AvatarImage src={user?.avatarUrl || undefined} alt={user?.displayName} /> */}
+            <AvatarFallback>
+              {/* {user?.displayName?.charAt(0).toUpperCase() ||  */}
+              "U"
+              {/* } */}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-3">
             <Textarea
@@ -63,10 +65,14 @@ export default function CreatePostCard({ onPost }: CreatePostCardProps) {
               className="resize-none border-0 focus-visible:ring-0 text-base min-h-[80px]"
               data-testid="create-post-input"
             />
-            
+
             {imagePreview && (
               <div className="relative rounded-lg overflow-hidden">
-                <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-64 object-cover" />
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-auto max-h-64 object-cover"
+                />
                 <Button
                   variant="secondary"
                   size="icon"
@@ -111,7 +117,7 @@ export default function CreatePostCard({ onPost }: CreatePostCardProps) {
                     Posting...
                   </>
                 ) : (
-                  'Post'
+                  "Post"
                 )}
               </Button>
             </div>

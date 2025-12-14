@@ -5,7 +5,7 @@ import { verifySession } from "../dal";
 import clientPromise from "../database/mongodb";
 import { ObjectId } from "mongodb";
 import { updateSession } from "../session";
-import { FriendList, User } from "../definitions";
+import { FriendList, FriendRequest, User } from "../definitions";
 
 export async function searchUsers(
   query: string,
@@ -85,7 +85,7 @@ export async function sendFriendRequest(receiverId: string) {
   }
 }
 
-export async function acceptFriendRequest(senderId: string) {
+export async function acceptFriendRequest(requestId: string, accept: boolean) {
   const session = await verifySession();
   if (!session) redirect("/login");
 
@@ -95,38 +95,40 @@ export async function acceptFriendRequest(senderId: string) {
     const client = await clientPromise;
     const db = client.db("authDB");
 
-    const sender = await db.collection("users").findOne({
-      _id: new ObjectId(senderId),
+    const friendRequestExists = await db.collection("friendRequests").findOne({
+      _id: new ObjectId(requestId),
     });
-    if (!sender) {
+    if (!friendRequestExists) {
       return { error: "USER_DOESNOT_EXIST" };
     }
 
-    const friendRequestExists = await db.collection("friendRequests").findOne({
-      senderId,
-      receiverId: session.userId,
-    });
+    if (friendRequestExists && !accept) {
+      await db.collection("friendRequests").updateOne(
+        {
+          _id: new ObjectId(requestId),
+        },
+        { $set: { status: "declined" } }
+      );
+      return { message: "Request Declined" };
+    }
 
-    if (friendRequestExists) {
+    if (friendRequestExists && accept) {
       switch (friendRequestExists.status) {
         case "pending":
           await db.collection("friendRequests").updateOne(
             {
-              senderId,
-              receiverId: session.userId,
+              _id: new ObjectId(requestId),
             },
             { $set: { status: "accepted" } }
           );
-          return { message: "Friend request accepted successfully." };
+          return { message: "Request Accepted" };
 
         case "accepted":
           return { error: "FRIEND_REQUEST_HAS_ALREADY_BEEN_ACCEPTED" };
-        case "rejected":
-          return { error: "FRIEND_REQUEST_HAS_BEEN_REJECTED" };
+        case "declined":
+          return { error: "FRIEND_REQUEST_HAS_BEEN_DECLINED" };
       }
     }
-
-    return { message: "Friend request sent to user successfully." };
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
@@ -157,36 +159,47 @@ export async function showFriends(userId: string): Promise<FriendList> {
   }
 }
 
-export async function showPendingRequests(userId: string): Promise<FriendList> {
+export async function showPendingRequests(): Promise<FriendRequest[]> {
   try {
+    const session = await verifySession();
+
     const client = await clientPromise;
     const db = client.db("authDB");
 
-    const requestIds = await db
+    const requests = await db
       .collection("friendRequests")
       .find({
         status: "pending",
-        receiverId: userId,
+        receiverId: session.userId,
       })
-      .map((req) => new ObjectId(req.senderId))
       .toArray();
 
-    const requestingUserDetails = await db
+    const senderIds = requests.map((r) => new ObjectId(r.senderId));
+
+    const users = await db
       .collection("users")
-      .find({ _id: { $in: requestIds } })
-      .project({ _id: 1, username: 1 })
+      .find({ _id: { $in: senderIds } })
+      .project({ username: 1, avatar: 1 })
       .toArray();
 
-    const formattedUsers = requestingUserDetails.map((user) => ({
-      username: user.username,
-      _id: user._id.toString(),
-    }));
+    const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
-    return formattedUsers;
+    return requests.map((req) => {
+      const user = userMap.get(req.senderId);
+
+      return {
+        id: req._id.toString(),
+        user: {
+          id: req.senderId,
+          name: user?.username ?? "Unknown",
+          username: user?.username ?? "unknown",
+          avatar: user?.avatar ?? null,
+          mutualFriends: 3,
+        },
+      };
+    });
   } catch (error) {
-    const client = await clientPromise;
-    const db = client.db("authDB");
     console.error(error);
-    return { error: "SOMETHING_WENT_WRONG" };
+    return [];
   }
 }

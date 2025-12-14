@@ -1,8 +1,12 @@
-import { Check, X } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useState } from 'react';
+"use client";
+
+import { Check, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { acceptFriendRequest } from "@/lib/actions/data";
+import { useToast } from "../hooks/use-toast";
+import { useState } from "react";
 
 export interface FriendRequest {
   id: string;
@@ -17,29 +21,43 @@ export interface FriendRequest {
 
 interface FriendRequestCardProps {
   request: FriendRequest;
-  onAccept?: (requestId: string) => void;
-  onReject?: (requestId: string) => void;
+  onFinished?: () => void;
 }
 
-export default function FriendRequestCard({ request, onAccept, onReject }: FriendRequestCardProps) {
-  const [status, setStatus] = useState<'pending' | 'accepted' | 'rejected'>('pending');
+export default function FriendRequestCard({
+  request,
+  onFinished,
+}: FriendRequestCardProps) {
+  const [status, setStatus] = useState<"pending" | "accepted" | "declined">("pending");
 
-  const handleAccept = () => {
-    setStatus('accepted');
-    onAccept?.(request.id);
+  const handleAccept = async () => {
+    const result = await acceptFriendRequest(request.id, true);
+    if (result?.message) {
+      setStatus("accepted");
+      setTimeout(() => {
+        onFinished?.();
+      }, 2000);
+    }
   };
 
-  const handleReject = () => {
-    setStatus('rejected');
-    onReject?.(request.id);
+  const handleReject = async () => {
+    const result = await acceptFriendRequest(request.id, false);
+    if (result?.message) {
+      setStatus("declined");
+      setTimeout(() => {
+        onFinished?.();
+      }, 2000);
+    }
   };
 
-  if (status !== 'pending') {
+  if (status !== "pending") {
     return (
       <Card className="bg-muted/50" data-testid={`friend-request-${request.id}`}>
         <CardContent className="p-4 text-center">
           <p className="text-sm text-muted-foreground">
-            {status === 'accepted' ? `You are now friends with ${request.user.name}` : 'Request removed'}
+            {status === "accepted"
+              ? `You are now friends with ${request.user.username}`
+              : "Request removed"}
           </p>
         </CardContent>
       </Card>
@@ -59,15 +77,25 @@ export default function FriendRequestCard({ request, onAccept, onReject }: Frien
             <p className="text-xs text-muted-foreground">@{request.user.username}</p>
             {request.user.mutualFriends > 0 && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                {request.user.mutualFriends} mutual friend{request.user.mutualFriends > 1 ? 's' : ''}
+                {request.user.mutualFriends} mutual friend
+                {request.user.mutualFriends > 1 ? "s" : ""}
               </p>
             )}
           </div>
           <div className="flex gap-2 flex-shrink-0">
-            <Button size="sm" onClick={handleAccept} data-testid={`accept-request-${request.id}`}>
+            <Button
+              size="sm"
+              onClick={handleAccept}
+              data-testid={`accept-request-${request.id}`}
+            >
               <Check className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={handleReject} data-testid={`reject-request-${request.id}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReject}
+              data-testid={`reject-request-${request.id}`}
+            >
               <X className="w-4 h-4" />
             </Button>
           </div>

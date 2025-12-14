@@ -72,3 +72,35 @@ export type UserTable = {
 };
 
 export type FriendList = UserWithoutEmail[] | { error: string };
+
+export interface Post {
+  id: string;
+  author: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string | null;
+  };
+  content: string;
+  imageUrl?: string;
+  likes: number;
+  comments: Array<{
+    id: string;
+    author: { name: string; avatar: string | null };
+    content: string;
+    time: string;
+  }>;
+  liked: boolean;
+  createdAt: string;
+}
+
+export interface FriendRequest {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string | null;
+    mutualFriends: number;
+  };
+}
