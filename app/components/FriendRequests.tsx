@@ -1,12 +1,13 @@
 "use client";
 
 import { useTransition } from "react";
-import { acceptFriendRequest } from "../lib/actions/data";
+import { acceptFriendRequest } from "@/lib/actions/data";
+import { UserWithoutEmail } from "@/lib/definitions";
 
 export default function FriendRequests({
   pendingRequestsList,
 }: {
-  pendingRequestsList: string[];
+  pendingRequestsList: UserWithoutEmail[];
 }) {
   if (pendingRequestsList?.length === 0) return;
 
@@ -27,9 +28,9 @@ export default function FriendRequests({
     <div>
       <div>pending requests</div>
       {pendingRequestsList.map((friend) => (
-        <div key={friend} className="flex gap-1">
-          <div>{friend}</div>
-          <button onClick={() => handleClick(friend)}>accept request</button>
+        <div key={friend._id} className="flex gap-1">
+          <div>{friend.username}</div>
+          <button onClick={() => handleClick(friend._id)}>accept request</button>
         </div>
       ))}
     </div>

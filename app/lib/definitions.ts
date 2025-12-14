@@ -65,8 +65,10 @@ export type User = {
   email: string;
 };
 
+export type UserWithoutEmail = Omit<User, "email">;
+
 export type UserTable = {
   users: User[];
 };
 
-export type FriendList = string[] | { error: string };
+export type FriendList = UserWithoutEmail[] | { error: string };

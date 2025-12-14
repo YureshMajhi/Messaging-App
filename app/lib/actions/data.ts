@@ -162,16 +162,27 @@ export async function showPendingRequests(userId: string): Promise<FriendList> {
     const client = await clientPromise;
     const db = client.db("authDB");
 
-    const requests = await db
+    const requestIds = await db
       .collection("friendRequests")
       .find({
         status: "pending",
         receiverId: userId,
       })
-      .map((req) => req.senderId)
+      .map((req) => new ObjectId(req.senderId))
       .toArray();
 
-    return requests;
+    const requestingUserDetails = await db
+      .collection("users")
+      .find({ _id: { $in: requestIds } })
+      .project({ _id: 1, username: 1 })
+      .toArray();
+
+    const formattedUsers = requestingUserDetails.map((user) => ({
+      username: user.username,
+      _id: user._id.toString(),
+    }));
+
+    return formattedUsers;
   } catch (error) {
     const client = await clientPromise;
     const db = client.db("authDB");

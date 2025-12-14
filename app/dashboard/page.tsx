@@ -41,9 +41,9 @@ export default async function Dashboard(props: {
         <div className="flex gap-2">
           <div>
             <div>friends</div>
-            {friendList.map((friend) => (
+            {/* {friendList.map((friend) => (
               <div key={friend}>{friend}</div>
-            ))}
+            ))} */}
           </div>
         </div>
       </div>
