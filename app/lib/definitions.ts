@@ -59,6 +59,13 @@ export type SessionPayload = {
   expiresAt: Date;
 };
 
+export type Session = {
+  isAuth: boolean;
+  userId: string;
+  userName: string;
+  avatarUrl?: string;
+};
+
 export type User = {
   _id: string;
   username: string;

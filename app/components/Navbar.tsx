@@ -15,15 +15,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-// import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import NotificationsDropdown from "./NotificationsDropdown";
 import Image from "next/image";
+import { signout } from "../lib/actions/auth";
 
 export default function Navbar() {
   const pathname = usePathname();
-  // const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -32,7 +31,6 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  // todo: remove mock functionality
   const unreadMessages = 3;
 
   const navItems = [
@@ -42,6 +40,10 @@ export default function Navbar() {
   ];
 
   const isActive = (href: string) => pathname === href;
+
+  const handleLogout = async () => {
+    return await signout();
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background border-b border-border">
@@ -126,7 +128,7 @@ export default function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  // onClick={logout}
+                  onClick={handleLogout}
                   className="text-destructive cursor-pointer"
                   data-testid="button-logout"
                 >
@@ -205,7 +207,7 @@ export default function Navbar() {
                     variant="ghost"
                     className="w-full justify-start gap-3 text-destructive"
                     onClick={() => {
-                      // logout();
+                      handleLogout();
                       setMobileMenuOpen(false);
                     }}
                   >

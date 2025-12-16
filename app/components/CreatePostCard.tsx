@@ -4,12 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Session } from "@/lib/definitions";
 
 interface CreatePostCardProps {
   onPost?: (content: string, imageUrl?: string) => void;
+  session: Session;
 }
 
-export default function CreatePostCard({ onPost }: CreatePostCardProps) {
+export default function CreatePostCard({ onPost, session }: CreatePostCardProps) {
   const [content, setContent] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
@@ -50,11 +52,9 @@ export default function CreatePostCard({ onPost }: CreatePostCardProps) {
       <CardContent className="p-4">
         <div className="flex gap-3">
           <Avatar className="h-10 w-10 flex-shrink-0">
-            {/* <AvatarImage src={user?.avatarUrl || undefined} alt={user?.displayName} /> */}
+            <AvatarImage src={session?.avatarUrl || undefined} alt={session?.userName} />
             <AvatarFallback>
-              {/* {user?.displayName?.charAt(0).toUpperCase() ||  */}
-              "U"
-              {/* } */}
+              {session?.userName?.charAt(0).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-3">

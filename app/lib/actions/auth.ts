@@ -86,13 +86,13 @@ export async function signin(state: FormState, formData: FormData) {
       return { error: "INVALID_PASSWORD" };
     }
 
-    await createSession(user._id.toString(), user.name);
+    await createSession(user._id.toString(), user.username);
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
   }
 
-  redirect("/dashboard");
+  redirect("/feed");
 }
 
 export async function signout() {
