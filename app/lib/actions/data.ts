@@ -121,7 +121,14 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
             },
             { $set: { status: "accepted" } }
           );
-          return { message: "Request Accepted" };
+
+          await db.collection("conversations").insertOne({
+            users: [friendRequestExists.senderId, friendRequestExists.receiverId],
+          });
+
+          return {
+            message: `OK`,
+          };
 
         case "accepted":
           return { error: "FRIEND_REQUEST_HAS_ALREADY_BEEN_ACCEPTED" };

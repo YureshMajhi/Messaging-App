@@ -1,15 +1,12 @@
 "use client";
 
 import { FriendRequest, Post, Session } from "@/lib/definitions";
-// import { useState } from "react";
-import Navbar from "@/components/Navbar";
 import CreatePostCard from "@/components/CreatePostCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import PostCard from "@/components/PostCard";
 import FriendRequestCard from "@/components/FriendRequestCard";
-import { acceptFriendRequest, showPendingRequests } from "../lib/actions/data";
-import { verifySession } from "../lib/dal";
+import { showPendingRequests } from "@/lib/actions/data";
 import { useEffect, useState } from "react";
 
 const mockPosts: Post[] = [
@@ -71,29 +68,6 @@ const mockPosts: Post[] = [
   },
 ];
 
-const mockFriendRequests: FriendRequest[] = [
-  {
-    id: "fr1",
-    user: {
-      id: "u5",
-      name: "Alex Rivera",
-      username: "alexr",
-      avatar: null,
-      mutualFriends: 3,
-    },
-  },
-  {
-    id: "fr2",
-    user: {
-      id: "u6",
-      name: "Jordan Lee",
-      username: "jordanl",
-      avatar: null,
-      mutualFriends: 1,
-    },
-  },
-];
-
 export default function FeedClient({ session }: { session: Session }) {
   const [requests, setRequests] = useState<FriendRequest[]>([]);
 
@@ -132,64 +106,61 @@ export default function FeedClient({ session }: { session: Session }) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <CreatePostCard onPost={handleNewPost} session={session} />
+    <main className="max-w-5xl mx-auto px-4 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <CreatePostCard onPost={handleNewPost} session={session} />
 
-            {isLoading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="w-10 h-10 rounded-full" />
-                        <div className="space-y-1">
-                          <Skeleton className="w-24 h-4" />
-                          <Skeleton className="w-16 h-3" />
-                        </div>
+          {isLoading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10 rounded-full" />
+                      <div className="space-y-1">
+                        <Skeleton className="w-24 h-4" />
+                        <Skeleton className="w-16 h-3" />
                       </div>
-                      <Skeleton className="w-full h-4" />
-                      <Skeleton className="w-3/4 h-4" />
-                      <Skeleton className="w-full h-48 rounded-lg" />
-                    </CardContent>
-                  </Card>
-                ))
-              : posts.map((post) => <PostCard key={post.id} post={post} />)}
-          </div>
+                    </div>
+                    <Skeleton className="w-full h-4" />
+                    <Skeleton className="w-3/4 h-4" />
+                    <Skeleton className="w-full h-48 rounded-lg" />
+                  </CardContent>
+                </Card>
+              ))
+            : posts.map((post) => <PostCard key={post.id} post={post} />)}
+        </div>
 
-          <div className="space-y-4 hidden lg:block">
-            {requests.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-semibold">Friend Requests</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 pt-0">
-                  {requests.map((request) => (
-                    <FriendRequestCard
-                      key={request.id}
-                      request={request}
-                      onFinished={handleRefresh}
-                    />
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
+        <div className="space-y-4 hidden lg:block">
+          {requests.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold">Suggested Friends</CardTitle>
+                <CardTitle className="text-sm font-semibold">Friend Requests</CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground">
-                  No suggestions right now. Invite your friends to join!
-                </p>
+              <CardContent className="space-y-3 pt-0">
+                {requests.map((request) => (
+                  <FriendRequestCard
+                    key={request.id}
+                    request={request}
+                    onFinished={handleRefresh}
+                  />
+                ))}
               </CardContent>
             </Card>
-          </div>
+          )}
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Suggested Friends</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-sm text-muted-foreground">
+                No suggestions right now. Invite your friends to join!
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

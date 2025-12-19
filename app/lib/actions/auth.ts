@@ -92,7 +92,7 @@ export async function signin(state: FormState, formData: FormData) {
     return { error: "SOMETHING_WENT_WRONG" };
   }
 
-  redirect("/feed");
+  redirect("/");
 }
 
 export async function signout() {
