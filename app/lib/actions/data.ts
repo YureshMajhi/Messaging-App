@@ -76,6 +76,7 @@ export async function sendFriendRequest(receiverId: string) {
       senderId: session.userId,
       receiverId: receiverId,
       status: "pending",
+      createdAt: new Date(),
     });
 
     return { message: "Friend request sent to user successfully." };
@@ -124,6 +125,7 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
 
           await db.collection("conversations").insertOne({
             users: [friendRequestExists.senderId, friendRequestExists.receiverId],
+            createdAt: new Date(),
           });
 
           return {

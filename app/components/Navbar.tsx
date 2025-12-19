@@ -34,7 +34,7 @@ export default function Navbar() {
   const unreadMessages = 3;
 
   const navItems = [
-    { href: "/feed", icon: Home, label: "Feed" },
+    { href: "/", icon: Home, label: "Feed" },
     { href: "/messages", icon: MessageCircle, label: "Messages", badge: unreadMessages },
     { href: "/profile", icon: User, label: "Profile" },
   ];
