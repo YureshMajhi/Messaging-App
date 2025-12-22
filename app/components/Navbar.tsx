@@ -49,7 +49,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-background border-b border-border">
       <div className="max-w-5xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/feed">
+          <Link href="/">
             <div
               className="flex items-center gap-2 cursor-pointer"
               data-testid="link-logo"

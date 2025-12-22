@@ -124,7 +124,11 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
           );
 
           await db.collection("conversations").insertOne({
-            users: [friendRequestExists.senderId, friendRequestExists.receiverId],
+            users: [
+              new ObjectId(friendRequestExists.senderId),
+              new ObjectId(friendRequestExists.receiverId),
+            ],
+            updatedAt: new Date(),
             createdAt: new Date(),
           });
 
@@ -210,5 +214,71 @@ export async function showPendingRequests(): Promise<FriendRequest[]> {
   } catch (error) {
     console.error(error);
     return [];
+  }
+}
+
+export default async function fetchConversations() {
+  try {
+    const session = await verifySession();
+
+    const client = await clientPromise;
+    const db = client.db("authDB");
+
+    const conversations = await db
+      .collection("conversations")
+      .aggregate([
+        {
+          $match: {
+            users: new ObjectId(session.userId),
+          },
+        },
+
+        {
+          $addFields: {
+            otherUserId: {
+              $first: {
+                $filter: {
+                  input: "$users",
+                  cond: { $ne: ["$$this", new ObjectId(session.userId)] },
+                },
+              },
+            },
+          },
+        },
+
+        {
+          $lookup: {
+            from: "users",
+            localField: "otherUserId",
+            foreignField: "_id",
+            as: "otherUser",
+          },
+        },
+
+        {
+          $unwind: "$otherUser",
+        },
+
+        {
+          $project: {
+            id: "$_id",
+            user: {
+              id: "$otherUser._id",
+              name: "$otherUser.name",
+              avatar: "$otherUser.avatar",
+              online: "$otherUser.online",
+            },
+            lastMessage: { $literal: "" },
+            lastMessageTime: "$updatedAt",
+            unreadCount: { $literal: 0 },
+          },
+        },
+      ])
+      .toArray();
+
+    return conversations;
+  } catch (error) {
+    console.error(error);
+    return { error: "SOMETHING_WENT_WRONG" };
   }
 }
