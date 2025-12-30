@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import z from "zod";
 
 export const AuthFormSchema = z
@@ -110,4 +111,19 @@ export interface FriendRequest {
     avatar: string | null;
     mutualFriends: number;
   };
+}
+
+interface ConversationUser {
+  id: ObjectId;
+  name: string;
+  avatar: string | null;
+  online: boolean;
+}
+
+export interface Conversation {
+  id: ObjectId;
+  user: ConversationUser;
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
 }

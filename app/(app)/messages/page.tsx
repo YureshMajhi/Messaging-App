@@ -1,3 +1,9 @@
 export default function Default() {
-  return <>No Conversations Found</>;
+  return (
+    <>
+      <p className="text-center text-md text-muted-foreground py-8">
+        Please select a conversation
+      </p>
+    </>
+  );
 }

@@ -5,7 +5,7 @@ import { verifySession } from "../dal";
 import clientPromise from "../database/mongodb";
 import { ObjectId } from "mongodb";
 import { updateSession } from "../session";
-import { FriendList, FriendRequest, User } from "../definitions";
+import { Conversation, FriendList, FriendRequest, User } from "../definitions";
 
 export async function searchUsers(
   query: string,
@@ -217,7 +217,7 @@ export async function showPendingRequests(): Promise<FriendRequest[]> {
   }
 }
 
-export default async function fetchConversations() {
+export default async function fetchConversations(): Promise<Conversation[]> {
   try {
     const session = await verifySession();
 
@@ -226,7 +226,7 @@ export default async function fetchConversations() {
 
     const conversations = await db
       .collection("conversations")
-      .aggregate([
+      .aggregate<Conversation>([
         {
           $match: {
             users: new ObjectId(session.userId),
@@ -261,10 +261,10 @@ export default async function fetchConversations() {
 
         {
           $project: {
-            id: "$_id",
+            id: { $toString: "$_id" },
             user: {
-              id: "$otherUser._id",
-              name: "$otherUser.name",
+              id: { $toString: "$otherUser._id" },
+              name: "$otherUser.username",
               avatar: "$otherUser.avatar",
               online: "$otherUser.online",
             },
@@ -279,6 +279,6 @@ export default async function fetchConversations() {
     return conversations;
   } catch (error) {
     console.error(error);
-    return { error: "SOMETHING_WENT_WRONG" };
+    return [];
   }
 }

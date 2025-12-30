@@ -1,44 +1,14 @@
 // import { useState, useRef, useEffect } from "react";
 import { Send, Search, ArrowLeft } from "lucide-react";
-import ConversationItem, { type Conversation } from "@/components/ConversationItem";
+import ConversationItem from "@/components/ConversationItem";
 // import MessageBubble, { type Message } from "@/components/MessageBubble";
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-// todo: remove mock functionality
-const mockConversations: Conversation[] = [
-  {
-    id: "c1",
-    user: { id: "u1", name: "Sarah Wilson", avatar: null, online: true },
-    lastMessage: "That sounds great! See you soon.",
-    lastMessageTime: "2m",
-    unreadCount: 2,
-  },
-  {
-    id: "c2",
-    user: { id: "u2", name: "Michael Chen", avatar: null, online: true },
-    lastMessage: "Thanks for the photos!",
-    lastMessageTime: "1h",
-    unreadCount: 0,
-  },
-  {
-    id: "c3",
-    user: { id: "u3", name: "Emma Thompson", avatar: null, online: false },
-    lastMessage: "Let me know when you arrive",
-    lastMessageTime: "3h",
-    unreadCount: 0,
-  },
-  {
-    id: "c4",
-    user: { id: "u4", name: "Alex Rivera", avatar: null, online: false },
-    lastMessage: "Happy birthday! Hope you have a great day",
-    lastMessageTime: "1d",
-    unreadCount: 0,
-  },
-];
+import fetchConversations from "@/app/lib/actions/data";
+import { formatTimeAgo } from "@/app/lib/utils";
 
 // const mockMessages: Record<string, Message[]> = {
 //   c1: [
@@ -265,7 +235,7 @@ const mockConversations: Conversation[] = [
 //   ],
 // };
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
   // const [conversations, setConversations] = useState(mockConversations);
   // const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   // const [messages, setMessages] = useState<Message[]>([]);
@@ -316,11 +286,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   //   );
   // };
 
-  // const filteredConversations = conversations.filter((c) =>
-  const filteredConversations = mockConversations.filter((c) =>
-    // c.user.name.toLowerCase().includes(searchQuery.toLowerCase())
-    c.user.name.toLowerCase().includes("".toLowerCase())
-  );
+  const conversations = await fetchConversations();
+
+  const filteredConversations = conversations;
+
   const activeConversation = null;
 
   return (
@@ -337,8 +306,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Input
                 placeholder="Search conversations..."
                 className="pl-9"
-                // value={searchQuery}
-                // onChange={(e) => setSearchQuery(e.target.value)}
                 data-testid="input-search-conversations"
               />
             </div>
@@ -352,7 +319,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ) : (
                 filteredConversations.map((conversation) => (
                   <ConversationItem
-                    key={conversation.id}
+                    key={conversation.id.toString()}
                     conversation={conversation}
                     // isActive={activeConversation?.id === conversation.id}
                     // onClick={() => setActiveConversation(conversation)}
