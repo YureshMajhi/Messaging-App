@@ -1,26 +1,38 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import { Conversation } from "../lib/definitions";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface ConversationItemProps {
   conversation: Conversation;
-  isActive?: boolean;
-  onClick?: () => void;
 }
 
-export default function ConversationItem({
-  conversation,
-  isActive,
-  onClick,
-}: ConversationItemProps) {
+export default function ConversationItem({ conversation }: ConversationItemProps) {
+  const params = useParams();
+  const activeId = params?.id;
+
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    if (!activeId) return;
+
+    if (activeId === conversation.id.toString()) {
+      setIsActive(true);
+      return;
+    }
+    setIsActive(false);
+  }, [activeId]);
+
   return (
     <div
       className={cn(
         "flex items-center gap-3 p-3 rounded-lg cursor-pointer hover-elevate active-elevate-2",
         isActive && "bg-muted"
       )}
-      onClick={onClick}
       data-testid={`conversation-${conversation.id}`}
     >
       <div className="relative">
@@ -58,7 +70,7 @@ export default function ConversationItem({
                 : "text-muted-foreground"
             )}
           >
-            {conversation.lastMessage}
+            {conversation?.lastMessage || "Send a message"}
           </p>
           {conversation.unreadCount > 0 && (
             <Badge variant="default" className="h-5 min-w-5 px-1.5 text-xs flex-shrink-0">

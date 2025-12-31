@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import fetchConversations from "@/app/lib/actions/data";
-import { formatTimeAgo } from "@/app/lib/utils";
+import Link from "next/link";
 
 // const mockMessages: Record<string, Message[]> = {
 //   c1: [
@@ -288,7 +288,13 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
   const conversations = await fetchConversations();
 
-  const filteredConversations = conversations;
+  const filteredConversations = conversations.map((c) => ({
+    id: c.id,
+    user: c.user,
+    lastMessage: c.lastMessage,
+    lastMessageTime: c.lastMessageTime,
+    unreadCount: c.unreadCount,
+  }));
 
   const activeConversation = null;
 
@@ -318,12 +324,16 @@ export default async function Layout({ children }: { children: React.ReactNode }
                 </p>
               ) : (
                 filteredConversations.map((conversation) => (
-                  <ConversationItem
+                  <Link
                     key={conversation.id.toString()}
-                    conversation={conversation}
-                    // isActive={activeConversation?.id === conversation.id}
-                    // onClick={() => setActiveConversation(conversation)}
-                  />
+                    href={`/messages/${conversation.id.toString()}`}
+                  >
+                    <ConversationItem
+                      conversation={conversation}
+                      // isActive={activeConversation?.id === conversation.id}
+                      // onClick={() => setActiveConversation(conversation)}
+                    />
+                  </Link>
                 ))
               )}
             </div>

@@ -268,7 +268,7 @@ export default async function fetchConversations(): Promise<Conversation[]> {
               avatar: "$otherUser.avatar",
               online: "$otherUser.online",
             },
-            lastMessage: { $literal: "" },
+            lastMessage: { $ifNull: ["$lastMessage", ""] },
             lastMessageTime: "$updatedAt",
             unreadCount: { $literal: 0 },
           },
