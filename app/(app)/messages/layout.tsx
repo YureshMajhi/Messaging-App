@@ -2,8 +2,8 @@
 import { Send, Search, ArrowLeft } from "lucide-react";
 import ConversationItem from "@/components/ConversationItem";
 // import MessageBubble, { type Message } from "@/components/MessageBubble";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -328,11 +328,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
                     key={conversation.id.toString()}
                     href={`/messages/${conversation.id.toString()}`}
                   >
-                    <ConversationItem
-                      conversation={conversation}
-                      // isActive={activeConversation?.id === conversation.id}
-                      // onClick={() => setActiveConversation(conversation)}
-                    />
+                    <ConversationItem conversation={conversation} />
                   </Link>
                 ))
               )}
@@ -347,40 +343,42 @@ export default async function Layout({ children }: { children: React.ReactNode }
           }`}
         >
           {children}
-          {/* {activeConversation ? (
-            <>
-              <div className="p-4 border-b flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
-                  onClick={() => setActiveConversation(null)}
-                  data-testid="button-back-to-conversations"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <div className="relative">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={activeConversation.user.avatar || undefined} />
-                    <AvatarFallback>
-                      {activeConversation.user.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  {activeConversation.user.online && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-status-online rounded-full border-2 border-background" />
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">{activeConversation.user.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {activeConversation.user.online ? "Online" : "Offline"}
-                  </p>
-                </div>
-              </div>
 
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-3">
-                  {messages.map((message, index) => (
+          {/* <>
+            <div className="p-4 border-b flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={() => setActiveConversation(null)}
+                data-testid="button-back-to-conversations"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <div className="relative">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={activeConversation.user.avatar || undefined} />
+                  <AvatarFallback>
+                    {activeConversation.user.name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                {activeConversation.user.online && (
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-status-online rounded-full border-2 border-background" />
+                )} 
+              </div>
+              <div>
+                <p className="font-semibold text-sm">
+                  {activeConversation.user.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {activeConversation.user.online ? "Online" : "Offline"}
+                </p>
+              </div>
+            </div>
+
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-3">
+                {messages.map((message, index) => (
                     <MessageBubble
                       key={message.id}
                       message={message}
@@ -389,36 +387,29 @@ export default async function Layout({ children }: { children: React.ReactNode }
                       }
                     />
                   ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-
-              <div className="p-4 border-t">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Type a message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                    className="flex-1"
-                    data-testid="input-message"
-                  />
-                  <Button onClick={handleSendMessage} data-testid="button-send-message">
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
+                <div ref={messagesEndRef} />
               </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-muted-foreground mb-2">Select a conversation</p>
-                <p className="text-sm text-muted-foreground">
-                  Choose from your existing conversations or start a new one
-                </p>
+            </ScrollArea>
+
+            <div className="p-4 border-t">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Type a message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  className="flex-1"
+                  data-testid="input-message"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  data-testid="button-send-message"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
               </div>
             </div>
-          )}*/}
+          </> */}
         </div>
       </Card>
     </main>
