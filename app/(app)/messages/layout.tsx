@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import fetchConversations from "@/app/lib/actions/data";
+import { fetchConversations } from "@/app/lib/actions/data";
 import Link from "next/link";
 
 // const mockMessages: Record<string, Message[]> = {

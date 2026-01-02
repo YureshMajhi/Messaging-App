@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import z from "zod";
+import z, { minSize } from "zod";
 
 export const AuthFormSchema = z
   .object({
@@ -30,6 +30,13 @@ export const OtpFormSchema = z.object({
     .string()
     .regex(/^\d+$/, { error: "Invalid OTP" })
     .length(6, { error: "OTP must be atleast 6 characters long" }),
+});
+
+export const MessageFormSchema = z.object({
+  content: z.string().trim().nonempty({ error: "Message cannot be empty." }),
+  conversationId: z
+    .string()
+    .regex(/^[a-f\d]{24}$/i, { error: "Conversation doesnot exist. Please try again." }),
 });
 
 export type FormState =

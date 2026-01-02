@@ -5,7 +5,13 @@ import { verifySession } from "../dal";
 import clientPromise from "../database/mongodb";
 import { ObjectId } from "mongodb";
 import { updateSession } from "../session";
-import { Conversation, FriendList, FriendRequest, User } from "../definitions";
+import {
+  Conversation,
+  FriendList,
+  FriendRequest,
+  MessageFormSchema,
+  User,
+} from "../definitions";
 
 export async function searchUsers(
   query: string,
@@ -217,7 +223,7 @@ export async function showPendingRequests(): Promise<FriendRequest[]> {
   }
 }
 
-export default async function fetchConversations(): Promise<Conversation[]> {
+export async function fetchConversations(): Promise<Conversation[]> {
   try {
     const session = await verifySession();
 
@@ -280,5 +286,43 @@ export default async function fetchConversations(): Promise<Conversation[]> {
   } catch (error) {
     console.error(error);
     return [];
+  }
+}
+
+export async function sendMessage(prevState: any, formData: FormData) {
+  const validatedFields = MessageFormSchema.safeParse({
+    content: formData.get("new-message"),
+    conversationId: formData.get("conversationId"),
+  });
+
+  if (!validatedFields.success) {
+    return { errors: validatedFields.error.flatten().fieldErrors };
+  }
+
+  const { content, conversationId } = validatedFields.data;
+
+  try {
+    const session = await verifySession();
+
+    const client = await clientPromise;
+    const db = client.db("authDB");
+
+    const conversations = await db
+      .collection("conversations")
+      .findOne({ _id: new ObjectId(conversationId) });
+
+    if (!conversations) {
+      return { error: "CONVERSATIONS_DOESNOT_EXIST" };
+    }
+
+    await db.collection("messages").insertOne({
+      conversationId,
+      content,
+      senderId: session.userId,
+      createdAt: new Date(),
+    });
+  } catch (error) {
+    console.log(error);
+    return { error: "SOMETHING_WENT_WRONG" };
   }
 }
