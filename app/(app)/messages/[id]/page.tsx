@@ -1,20 +1,15 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import MessageBubble, { type Message } from "@/components/MessageBubble";
-import { Send, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { useActionState } from "react";
-import { sendMessage } from "@/app/lib/actions/data";
-import { useParams } from "next/navigation";
+import { fetchMessages } from "@/app/lib/actions/data";
+import SendMessage from "@/app/components/SendMessage";
+import MessageBox from "@/app/components/MessageBox";
 
-export default function Messages() {
-  const params = useParams();
-  const activeId = params?.id;
+export default async function Messages(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const conversationId = params.id;
 
-  const [state, action, pending] = useActionState(sendMessage, undefined);
+  const messages = await fetchMessages(conversationId);
 
   return (
     <>
@@ -46,42 +41,9 @@ export default function Messages() {
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-3">
-          {/* {messages.map((message, index) => (
-                    <MessageBubble
-                      key={message.id}
-                      message={message}
-                      showAvatar={
-                        index === 0 || messages[index - 1].senderId !== message.senderId
-                      }
-                    />
-                  ))} */}
-          {/* <div ref={messagesEndRef} /> */}
-        </div>
-      </ScrollArea>
+      <MessageBox messages={messages} />
 
-      <form action={action}>
-        <div className="p-4 border-t">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Type a message..."
-              className="flex-1"
-              data-testid="input-message"
-              name="new-message"
-            />
-            <Input
-              type="hidden"
-              placeholder="Type a message..."
-              name="conversationId"
-              value={activeId}
-            />
-            <Button type="submit" data-testid="button-send-message">
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </form>
+      <SendMessage activeId={conversationId} />
     </>
   );
 }

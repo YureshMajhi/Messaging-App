@@ -12,6 +12,9 @@ import {
   MessageFormSchema,
   User,
 } from "../definitions";
+import { Message } from "@/app/components/MessageBubble";
+import { formatMessageTimestamp } from "../utils";
+import { revalidatePath } from "next/cache";
 
 export async function searchUsers(
   query: string,
@@ -307,9 +310,15 @@ export async function sendMessage(prevState: any, formData: FormData) {
     const client = await clientPromise;
     const db = client.db("authDB");
 
-    const conversations = await db
-      .collection("conversations")
-      .findOne({ _id: new ObjectId(conversationId) });
+    const conversations = await db.collection("conversations").findOneAndUpdate(
+      { _id: new ObjectId(conversationId) },
+      {
+        $set: {
+          lastMessage: content,
+          updatedAt: new Date(),
+        },
+      }
+    );
 
     if (!conversations) {
       return { error: "CONVERSATIONS_DOESNOT_EXIST" };
@@ -319,10 +328,47 @@ export async function sendMessage(prevState: any, formData: FormData) {
       conversationId,
       content,
       senderId: session.userId,
+      senderName: session.userName,
+      senderAvatar: null,
       createdAt: new Date(),
     });
+
+    revalidatePath("/messages/conversationId");
   } catch (error) {
     console.log(error);
     return { error: "SOMETHING_WENT_WRONG" };
+  }
+}
+
+export async function fetchMessages(conversationId: string): Promise<Message[]> {
+  try {
+    const session = await verifySession();
+
+    const client = await clientPromise;
+    const db = client.db("authDB");
+
+    const rawMessages = await db
+      .collection("messages")
+      .find({ conversationId })
+      .toArray();
+
+    if (rawMessages.length === 0) {
+      return [];
+    }
+
+    const messages: Message[] = rawMessages.map((msg) => ({
+      id: msg._id.toString(),
+      content: msg.content,
+      senderId: msg.senderId,
+      senderName: msg.senderName,
+      senderAvatar: msg.senderAvatar ?? null,
+      timestamp: formatMessageTimestamp(msg.createdAt),
+      isOwn: msg.senderId === session.userId,
+    }));
+
+    return messages;
+  } catch (error) {
+    console.log(error);
+    return [];
   }
 }
