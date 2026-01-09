@@ -25,7 +25,9 @@
       "@/lib/*": ["app/lib/*"],
       "@/assets/*": ["app/assets/*"],
       "@/hooks/*": ["app/hooks/*"],
-      "@/context/*": ["app/context/*"]
+      "@/context/*": ["app/context/*"],
+      "@/app/*": ["app/*"],
+      "@/socket": ["app/socket.ts"]
     }
   },
   "include": [

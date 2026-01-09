@@ -1,20 +1,31 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import { sendMessage } from "@/lib/actions/data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
+import { socket } from "@/socket";
 
 export default function SendMessage({ activeId }: { activeId: string }) {
   const [state, action, pending] = useActionState(sendMessage, undefined);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (pending) return;
 
     const form = e.currentTarget;
-    action(new FormData(form));
+
+    startTransition(() => {
+      action(new FormData(form));
+    });
+
+    await fetch("http://localhost:3000/emitMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Hello from server function" }),
+    });
+
     form.reset();
   };
 
