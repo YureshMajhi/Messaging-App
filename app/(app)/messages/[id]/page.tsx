@@ -4,11 +4,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetchMessages } from "@/app/lib/actions/data";
 import SendMessage from "@/app/components/SendMessage";
 import MessageBox from "@/app/components/MessageBox";
+import { verifySession } from "@/app/lib/dal";
 
 export default async function Messages(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const conversationId = params.id;
 
+  const session = await verifySession();
   const messages = await fetchMessages(conversationId);
 
   return (
@@ -41,7 +43,7 @@ export default async function Messages(props: { params: Promise<{ id: string }> 
         </div>
       </div>
 
-      <MessageBox messages={messages} />
+      <MessageBox messages={messages} userId={session.userId} />
 
       <SendMessage activeId={conversationId} />
     </>

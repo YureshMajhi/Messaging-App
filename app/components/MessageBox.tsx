@@ -5,11 +5,19 @@ import MessageBubble, { type Message } from "@/components/MessageBubble";
 import { useEffect, useRef, useState } from "react";
 import { socket } from "@/socket";
 
-export default function MessageBox({ messages }: { messages: Message[] }) {
+export default function MessageBox({
+  messages,
+  userId,
+}: {
+  messages: Message[];
+  userId: String;
+}) {
+  const [currentMessage, setCurrentMessage] = useState<Message[]>(messages);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [currentMessage]);
 
   useEffect(() => {
     if (socket.connected) {
@@ -31,7 +39,16 @@ export default function MessageBox({ messages }: { messages: Message[] }) {
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
 
-    socket.on("new-message", (data) => console.log(data));
+    socket.on("new-message", (message) => {
+      let newMessage = message;
+      if (newMessage.senderId === userId) {
+        newMessage.isOwn = true;
+      } else {
+        newMessage.isOwn = false;
+      }
+
+      setCurrentMessage((prev) => [...prev, newMessage]);
+    });
 
     return () => {
       socket.off("connect", onConnect);
@@ -43,12 +60,12 @@ export default function MessageBox({ messages }: { messages: Message[] }) {
     <>
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
-          {messages.map((message, index) => (
+          {currentMessage.map((message, index) => (
             <MessageBubble
               key={message.id}
               message={message}
               showAvatar={
-                index === 0 || messages[index - 1].senderId !== message.senderId
+                index === 0 || currentMessage[index - 1].senderId !== message.senderId
               }
             />
           ))}

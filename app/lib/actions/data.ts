@@ -324,7 +324,7 @@ export async function sendMessage(prevState: any, formData: FormData) {
       return { error: "CONVERSATIONS_DOESNOT_EXIST" };
     }
 
-    await db.collection("messages").insertOne({
+    const result = await db.collection("messages").insertOne({
       conversationId,
       content,
       senderId: session.userId,
@@ -333,7 +333,20 @@ export async function sendMessage(prevState: any, formData: FormData) {
       createdAt: new Date(),
     });
 
-    revalidatePath("/messages/conversationId");
+    if (!result) {
+      return { errro: "CANNOT_SEND_MESSAGE" };
+    }
+
+    return {
+      data: {
+        id: result.insertedId.toString(),
+        content,
+        senderId: session.userId,
+        senderName: session.userName,
+        senderAvatar: null,
+        timeStamp: new Date().toISOString(),
+      },
+    };
   } catch (error) {
     console.log(error);
     return { error: "SOMETHING_WENT_WRONG" };

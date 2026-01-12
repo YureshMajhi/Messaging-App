@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState } from "react";
+import { startTransition, useActionState, useEffect } from "react";
 import { sendMessage } from "@/lib/actions/data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,14 +20,21 @@ export default function SendMessage({ activeId }: { activeId: string }) {
       action(new FormData(form));
     });
 
-    await fetch("http://localhost:3000/emitMessage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Hello from server function" }),
-    });
-
     form.reset();
   };
+
+  useEffect(() => {
+    if (!state?.data) return;
+
+    const newMessage = async () =>
+      await fetch("http://localhost:3000/emitMessage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: state.data }),
+      });
+
+    newMessage();
+  }, [state]);
 
   return (
     <form onSubmit={handleSubmit}>
