@@ -19,10 +19,10 @@ export default async function Dashboard(props: {
 
   const users = await searchUsers(query, currentPage, session.userId);
   const friends = await showFriends(session.userId);
-  const pendingRequests = await showPendingRequests(session.userId);
+  // const pendingRequests = await showPendingRequests(session.userId);
 
   const friendList = "error" in friends ? [] : friends;
-  const pendingRequestsList = "error" in pendingRequests ? [] : pendingRequests;
+  // const pendingRequestsList = "error" in pendingRequests ? [] : pendingRequests;
 
   return (
     <>
