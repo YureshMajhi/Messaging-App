@@ -3,7 +3,7 @@ import { searchUsers, showFriends, showPendingRequests } from "../lib/actions/da
 import { verifySession } from "../lib/dal";
 import Search from "../ui/search";
 import Table from "../ui/table";
-import FriendRequests from "../components/FriendRequests";
+// import FriendRequests from "../components/FriendRequests";
 
 export default async function Dashboard(props: {
   searchParams?: Promise<{
@@ -36,7 +36,7 @@ export default async function Dashboard(props: {
           </div>
         </div>
 
-        <FriendRequests pendingRequestsList={pendingRequestsList} />
+        {/* <FriendRequests pendingRequestsList={pendingRequestsList} /> */}
 
         <div className="flex gap-2">
           <div>

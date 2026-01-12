@@ -14,15 +14,14 @@ export default function FriendRequests({
   const [isPending, startTransition] = useTransition();
 
   const handleClick = (id: string) => {
-    startTransition(async () => {
-      const result = await acceptFriendRequest(id);
-
-      if (result?.error) {
-        console.error(result.error);
-      } else if (result?.message) {
-        console.log(result.message);
-      }
-    });
+    // startTransition(async () => {
+    //   const result = await acceptFriendRequest(id);
+    //   if (result?.error) {
+    //     console.error(result.error);
+    //   } else if (result?.message) {
+    //     console.log(result.message);
+    //   }
+    // });
   };
   return (
     <div>
