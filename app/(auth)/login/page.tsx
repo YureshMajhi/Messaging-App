@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import Layout from "@/app/components/authLayout/layout";
+import AuthLayout from "@/app/components/authLayout/AuthLayout";
 
 export default function Login() {
   const [state, action, pending] = useActionState(signin, undefined);
@@ -45,7 +45,7 @@ export default function Login() {
 
   return (
     <>
-      <Layout mode="signin">
+      <AuthLayout mode="signin">
         <form action={action}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -130,7 +130,7 @@ export default function Login() {
             </p>
           </CardFooter>
         </form>
-      </Layout>
+      </AuthLayout>
     </>
   );
 }

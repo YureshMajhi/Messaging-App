@@ -9,8 +9,8 @@ import { Input } from "@/app/components/ui/input";
 import { useToast } from "@/app/hooks/use-toast";
 import { Check, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
-import Layout from "@/app/components/authLayout/layout";
 import OtpModal from "@/app/components/modal/OtpModal";
+import AuthLayout from "@/app/components/authLayout/AuthLayout";
 
 export default function SignUp() {
   const [formState, formAction, pending] = useActionState(signup, undefined);
@@ -58,7 +58,7 @@ export default function SignUp() {
 
   return (
     <>
-      <Layout mode="signup">
+      <AuthLayout mode="signup">
         <OtpModal
           showOtpBox={showOtpBox}
           setShowOtpBox={setShowOtpBox}
@@ -188,7 +188,7 @@ export default function SignUp() {
             </p>
           </CardFooter>
         </form>
-      </Layout>
+      </AuthLayout>
     </>
   );
 }

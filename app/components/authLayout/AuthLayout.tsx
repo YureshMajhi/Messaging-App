@@ -3,7 +3,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import Image from "next/image";
 import logoUrl from "@/assets/Dalla Dalli Logo.jpeg";
 
-export default function Layout({
+export default function AuthLayout({
   children,
   mode,
 }: {
