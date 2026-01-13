@@ -27,7 +27,7 @@ export default function SendMessage({ activeId }: { activeId: string }) {
     if (!state?.data) return;
 
     const newMessage = async () =>
-      await fetch("http://localhost:3000/emitMessage", {
+      await fetch(`${window.location.origin}/emitMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: state.data }),
