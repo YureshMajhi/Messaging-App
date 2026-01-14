@@ -43,7 +43,7 @@ export default async function Messages(props: { params: Promise<{ id: string }> 
         </div>
       </div>
 
-      <MessageBox messages={messages} userId={session.userId} />
+      <MessageBox messages={messages} userId={session.userId} chatId={conversationId} />
 
       <SendMessage activeId={conversationId} />
     </>

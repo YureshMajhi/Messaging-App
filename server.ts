@@ -20,7 +20,7 @@ app.prepare().then(() => {
       req.on("end", () => {
         try {
           const data = JSON.parse(body);
-          io.emit("new-message", data.message);
+          io.to(data.chatId).emit("new-message", data.message);
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ ok: true }));
         } catch (err) {
@@ -41,6 +41,10 @@ app.prepare().then(() => {
 
     socket.on("disconnected", () => {
       console.log("user disconnected", socket.id);
+    });
+
+    socket.on("join-room", (chatId) => {
+      socket.join(chatId);
     });
   });
 

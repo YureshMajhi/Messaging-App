@@ -5,7 +5,6 @@ import { sendMessage } from "@/lib/actions/data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import { socket } from "@/socket";
 
 export default function SendMessage({ activeId }: { activeId: string }) {
   const [state, action, pending] = useActionState(sendMessage, undefined);
@@ -30,7 +29,7 @@ export default function SendMessage({ activeId }: { activeId: string }) {
       await fetch(`${window.location.origin}/emitMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: state.data }),
+        body: JSON.stringify({ message: state.data, chatId: activeId }),
       });
 
     newMessage();

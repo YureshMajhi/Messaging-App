@@ -8,9 +8,11 @@ import { socket } from "@/socket";
 export default function MessageBox({
   messages,
   userId,
+  chatId,
 }: {
   messages: Message[];
   userId: String;
+  chatId: String;
 }) {
   const [currentMessage, setCurrentMessage] = useState<Message[]>(messages);
 
@@ -30,6 +32,8 @@ export default function MessageBox({
       socket.io.engine.on("upgrade", (transport) => {
         console.log("Socket transported: ", transport.name);
       });
+
+      socket.emit("join-room", chatId);
     }
 
     function onDisconnect() {
