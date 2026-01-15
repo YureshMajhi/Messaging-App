@@ -13,7 +13,7 @@ import {
   User,
 } from "../definitions";
 import { Message } from "@/app/components/MessageBubble";
-import { formatMessageTimestamp } from "../utils";
+import { formatMessageTimestamp, formatTimeAgo } from "../utils";
 import { revalidatePath } from "next/cache";
 
 export async function searchUsers(
@@ -270,6 +270,7 @@ export async function fetchConversations(): Promise<Conversation[]> {
 
         {
           $project: {
+            _id: 0,
             id: { $toString: "$_id" },
             user: {
               id: { $toString: "$otherUser._id" },

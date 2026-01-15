@@ -128,7 +128,7 @@ interface ConversationUser {
 }
 
 export interface Conversation {
-  id: ObjectId;
+  id: String;
   user: ConversationUser;
   lastMessage: string;
   lastMessageTime: Date;

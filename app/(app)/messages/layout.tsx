@@ -1,3 +1,5 @@
+"use client";
+
 import { Search } from "lucide-react";
 import ConversationItem from "@/components/ConversationItem";
 import { Card } from "@/components/ui/card";
@@ -5,19 +7,44 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { fetchConversations } from "@/app/lib/actions/data";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Conversation } from "@/app/lib/definitions";
+import { useParams } from "next/navigation";
 
-export default async function Layout({ children }: { children: React.ReactNode }) {
-  const conversations = await fetchConversations();
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([]);
 
-  const filteredConversations = conversations.map((c) => ({
-    id: c.id,
-    user: c.user,
-    lastMessage: c.lastMessage,
-    lastMessageTime: c.lastMessageTime,
-    unreadCount: c.unreadCount,
-  }));
+  const params = useParams();
+  const id = params?.id;
 
-  const activeConversation = null;
+  useEffect(() => {
+    const conversations = async () => {
+      const conversations = await fetchConversations();
+
+      const mappedConversations = conversations.map((c) => ({
+        id: c.id,
+        user: c.user,
+        lastMessage: c.lastMessage,
+        lastMessageTime: c.lastMessageTime,
+        unreadCount: c.unreadCount,
+      }));
+
+      setFilteredConversations(mappedConversations);
+    };
+
+    conversations();
+  }, []);
+
+  useEffect(() => {
+    if (!id) setActiveConversation(false);
+    if (filteredConversations.length === 0) return;
+    const conversationExists = filteredConversations.find((c) => c.id === id);
+
+    if (conversationExists) setActiveConversation(true);
+  }, [id]);
+
+  // const activeConversation = null;
+  const [activeConversation, setActiveConversation] = useState<Boolean>(false);
 
   return (
     <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-4">
