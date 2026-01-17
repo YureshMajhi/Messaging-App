@@ -5,6 +5,7 @@ import { fetchMessages } from "@/app/lib/actions/data";
 import SendMessage from "@/app/components/SendMessage";
 import MessageBox from "@/app/components/MessageBox";
 import { verifySession } from "@/app/lib/dal";
+import Link from "next/link";
 
 export default async function Messages(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -22,7 +23,9 @@ export default async function Messages(props: { params: Promise<{ id: string }> 
           className="md:hidden"
           data-testid="button-back-to-conversations"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <Link href={"/messages"}>
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
         </Button>
         <div className="relative">
           <Avatar className="h-10 w-10">

@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, User, MessageCircle, Bell, LogOut, Sun, Moon, Menu } from "lucide-react";
+import {
+  Home,
+  User,
+  MessageCircle,
+  Bell,
+  LogOut,
+  Sun,
+  Moon,
+  Menu,
+  Users,
+} from "lucide-react";
 import logoUrl from "@/assets/Dalla Dalli Logo.jpeg";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,6 +45,7 @@ export default function Navbar() {
 
   const navItems = [
     { href: "/", icon: Home, label: "Feed" },
+    { href: "/friends", icon: Users, label: "Friends" },
     { href: "/messages", icon: MessageCircle, label: "Messages", badge: unreadMessages },
     { href: "/profile", icon: User, label: "Profile" },
   ];
