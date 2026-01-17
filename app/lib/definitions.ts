@@ -135,9 +135,11 @@ export interface Conversation {
   unreadCount: number;
 }
 
+type FriendStatus = "friend" | "pending" | "none";
 export interface Friend {
-  id: String;
+  id: string;
   name: String;
   username: String;
   avatar: string | null;
+  status: FriendStatus;
 }

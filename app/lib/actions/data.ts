@@ -202,6 +202,7 @@ export async function showFriends(): Promise<Friend[]> {
             name: "$friend.username",
             username: "$friend.username",
             avatar: null,
+            status: "friend",
           },
         },
       ])
