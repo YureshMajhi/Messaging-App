@@ -134,3 +134,10 @@ export interface Conversation {
   lastMessageTime: Date;
   unreadCount: number;
 }
+
+export interface Friend {
+  id: String;
+  name: String;
+  username: String;
+  avatar: string | null;
+}

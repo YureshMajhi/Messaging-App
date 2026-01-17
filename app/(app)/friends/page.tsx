@@ -1,26 +1,17 @@
-import { Search, UserPlus, UserMinus, UserCheck, Users } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { showFriends } from "@/app/lib/actions/data";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function Friends() {
+export default async function Friends() {
+  const friendList = await showFriends();
+
   return (
     <>
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-primary/10 rounded-full">
-            <Users className="w-6 h-6 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">Friends</h1>
-        </div>
-
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search people..."
-            className="pl-10"
-            data-testid="input-search-friends"
-          />
-        </div>
-      </main>
+      <Tabs defaultValue="my-friends" className="w-full">
+        <TabsList className="w-full grid grid-cols-2 mb-6">
+          <TabsTrigger value="my-friends">My Friends ({friendList.length})</TabsTrigger>
+          <TabsTrigger value="discover">Discover</TabsTrigger>
+        </TabsList>
+      </Tabs>
     </>
   );
 }

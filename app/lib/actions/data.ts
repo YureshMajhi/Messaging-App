@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 import { updateSession } from "../session";
 import {
   Conversation,
+  Friend,
   FriendList,
   FriendRequest,
   MessageFormSchema,
@@ -19,7 +20,7 @@ import { revalidatePath } from "next/cache";
 export async function searchUsers(
   query: string,
   currentPage: number,
-  userId: string
+  userId: string,
 ): Promise<User[]> {
   if (!query) return [];
 
@@ -117,7 +118,7 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
         {
           _id: new ObjectId(requestId),
         },
-        { $set: { status: "declined" } }
+        { $set: { status: "declined" } },
       );
       return { message: "Request Declined" };
     }
@@ -129,7 +130,7 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
             {
               _id: new ObjectId(requestId),
             },
-            { $set: { status: "accepted" } }
+            { $set: { status: "accepted" } },
           );
 
           await db.collection("conversations").insertOne({
@@ -157,27 +158,59 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
   }
 }
 
-export async function showFriends(userId: string): Promise<FriendList> {
+export async function showFriends(): Promise<Friend[]> {
+  const session = await verifySession();
   try {
     const client = await clientPromise;
     const db = client.db("authDB");
 
-    const requests = await db
+    const friends = await db
       .collection("friendRequests")
-      .find({
-        status: "accepted",
-        $or: [{ senderId: userId }, { receiverId: userId }],
-      })
+      .aggregate<Friend>([
+        {
+          $match: {
+            status: "accepted",
+            $or: [{ senderId: session.userId }, { receiverId: session.userId }],
+          },
+        },
+        {
+          $addFields: {
+            friendId: {
+              $toObjectId: {
+                $cond: [
+                  { $eq: ["$senderId", session.userId] },
+                  "$receiverId",
+                  "$senderId",
+                ],
+              },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "friendId",
+            foreignField: "_id",
+            as: "friend",
+          },
+        },
+        { $unwind: "$friend" },
+        {
+          $project: {
+            _id: 0,
+            id: "$friend._id",
+            name: "$friend.username",
+            username: "$friend.username",
+            avatar: null,
+          },
+        },
+      ])
       .toArray();
 
-    const mapped = requests.map((req) => {
-      return req.receiverId === userId ? req.senderId : req.receiverId;
-    });
-
-    return mapped;
+    return friends;
   } catch (error) {
     console.error(error);
-    return { error: "SOMETHING_WENT_WRONG" };
+    return [];
   }
 }
 
@@ -318,7 +351,7 @@ export async function sendMessage(prevState: any, formData: FormData) {
           lastMessage: content,
           updatedAt: new Date(),
         },
-      }
+      },
     );
 
     if (!conversations) {
