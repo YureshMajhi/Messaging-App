@@ -3,14 +3,16 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 
-export default function Search() {
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+
+export default function SearchFriends() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
   const handleChange = useDebouncedCallback((text) => {
     const params = new URLSearchParams(searchParams);
-    params.set("page", "1");
 
     if (text) {
       params.set("query", text);
@@ -23,11 +25,15 @@ export default function Search() {
 
   return (
     <>
-      <input
-        type="text"
-        placeholder="Search for user"
-        onChange={(e) => handleChange(e.target.value)}
-      />
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Search people..."
+          className="pl-10"
+          data-testid="input-search-friends"
+          onChange={(e) => handleChange(e.target.value)}
+        />
+      </div>
     </>
   );
 }

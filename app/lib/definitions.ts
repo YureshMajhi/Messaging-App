@@ -135,7 +135,7 @@ export interface Conversation {
   unreadCount: number;
 }
 
-type FriendStatus = "friend" | "pending" | "none";
+type FriendStatus = "friend" | "requested" | "pending" | "none";
 export interface Friend {
   id: string;
   name: String;

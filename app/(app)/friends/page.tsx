@@ -1,26 +1,48 @@
-import { showFriends } from "@/app/lib/actions/data";
+"use client";
+
+import { searchUsers, showFriends } from "@/app/lib/actions/data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Friend } from "@/app/lib/definitions";
+import { Friend, FriendList } from "@/app/lib/definitions";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus, UserMinus, UserCheck, Users } from "lucide-react";
+import { UserPlus, UserMinus, UserCheck, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default async function Friends() {
-  const friendsList = await showFriends();
+export default function Friends() {
+  const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+  const query = params.get("query") ?? "";
+
+  const [friendsList, setFriendsList] = useState<Friend[]>([]);
+
+  useEffect(() => {
+    const friendsList = async () => {
+      const allFriends = await showFriends();
+      if (allFriends.length > 0) setFriendsList(allFriends);
+    };
+
+    const newPeople = async () => {
+      const allPeople = await searchUsers(query);
+      setFriendsList(allPeople);
+    };
+
+    if (query) {
+      newPeople();
+      return;
+    }
+
+    friendsList();
+  }, [query]);
 
   return (
     <>
       <Tabs defaultValue="my-friends" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-6">
-          <TabsTrigger value="my-friends">My Friends ({friendsList.length})</TabsTrigger>
-          <TabsTrigger value="discover">Discover</TabsTrigger>
-        </TabsList>
-
         <TabsContent value="my-friends" className="space-y-4">
           {friendsList.length > 0 ? (
             friendsList.map((person, i) => (
-              <FriendCard key={person.id + i} person={person} />
+              <PeopleCard key={person.id + i} person={person} />
             ))
           ) : (
             <div className="text-center py-12 text-muted-foreground">
@@ -33,7 +55,7 @@ export default async function Friends() {
   );
 }
 
-function FriendCard({ person }: { person: Friend }) {
+function PeopleCard({ person }: { person: Friend }) {
   return (
     <Card className="hover-elevate">
       <CardContent className="p-4 flex items-center justify-between">
@@ -61,7 +83,7 @@ function FriendCard({ person }: { person: Friend }) {
               <UserMinus className="w-4 h-4 mr-2" />
               Remove
             </Button>
-          ) : person.status === "pending" ? (
+          ) : person.status === "requested" ? (
             <Button
               variant="secondary"
               size="sm"
@@ -71,7 +93,7 @@ function FriendCard({ person }: { person: Friend }) {
               <UserCheck className="w-4 h-4 mr-2" />
               Sent
             </Button>
-          ) : (
+          ) : person.status === "none" ? (
             <Button
               variant="default"
               size="sm"
@@ -79,6 +101,15 @@ function FriendCard({ person }: { person: Friend }) {
             >
               <UserPlus className="w-4 h-4 mr-2" />
               Add Friend
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              size="sm"
+              data-testid={`button-accept-friend-${person.id}`}
+            >
+              <UserCheck className="w-4 h-4 mr-2" />
+              Accept
             </Button>
           )}
         </div>

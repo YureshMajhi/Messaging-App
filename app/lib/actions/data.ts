@@ -15,14 +15,14 @@ import {
 } from "../definitions";
 import { Message } from "@/app/components/MessageBubble";
 import { formatMessageTimestamp, formatTimeAgo } from "../utils";
-import { revalidatePath } from "next/cache";
 
 export async function searchUsers(
   query: string,
-  currentPage: number,
-  userId: string,
-): Promise<User[]> {
+  currentPage?: number,
+): Promise<Friend[]> {
   if (!query) return [];
+
+  const session = await verifySession();
 
   try {
     const client = await clientPromise;
@@ -30,20 +30,99 @@ export async function searchUsers(
 
     const users = await db
       .collection("users")
-      .find({
-        isVerified: true,
-        _id: { $ne: new ObjectId(userId) },
-        $or: [
-          { name: { $regex: query, $options: "i" } },
-          { email: { $regex: query, $options: "i" } },
-        ],
-      })
-      .project({ _id: 1, username: 1, email: 1 })
+      .aggregate<Friend>([
+        {
+          $match: {
+            username: { $regex: query, $options: "i" },
+            isVerified: true,
+            _id: { $ne: new ObjectId(session.userId) },
+          },
+        },
+
+        {
+          $lookup: {
+            from: "friendRequests",
+            let: { otherUserId: { $toString: "$_id" } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $or: [
+                      {
+                        $and: [
+                          { $eq: ["$senderId", session.userId] },
+                          { $eq: ["$receiverId", "$$otherUserId"] },
+                        ],
+                      },
+                      {
+                        $and: [
+                          { $eq: ["$receiverId", session.userId] },
+                          { $eq: ["$senderId", "$$otherUserId"] },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "friendRequest",
+          },
+        },
+
+        {
+          $addFields: {
+            friendRequest: { $arrayElemAt: ["$friendRequest", 0] },
+          },
+        },
+
+        {
+          $addFields: {
+            status: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ["$friendRequest.status", "accepted"] },
+                    then: "friend",
+                  },
+                  {
+                    case: {
+                      $and: [
+                        { $eq: ["$friendRequest.status", "pending"] },
+                        { $eq: ["$friendRequest.senderId", session.userId] },
+                      ],
+                    },
+                    then: "requested",
+                  },
+                  {
+                    case: {
+                      $and: [
+                        { $eq: ["$friendRequest.status", "pending"] },
+                        { $eq: ["$friendRequest.receiverId", session.userId] },
+                      ],
+                    },
+                    then: "pending",
+                  },
+                ],
+                default: "none",
+              },
+            },
+          },
+        },
+
+        {
+          $project: {
+            _id: 0,
+            id: { $toString: "$_id" },
+            username: 1,
+            name: "$username",
+            avatar: null,
+            status: 1,
+          },
+        },
+      ])
       .toArray();
 
-    const userList = users.map((user) => ({ ...user, _id: user._id.toString() }));
-
-    return userList as User[];
+    return users;
   } catch (error) {
     console.error(error);
     return [];
@@ -198,7 +277,7 @@ export async function showFriends(): Promise<Friend[]> {
         {
           $project: {
             _id: 0,
-            id: "$friend._id",
+            id: { $toString: "$friend._id" },
             name: "$friend.username",
             username: "$friend.username",
             avatar: null,
