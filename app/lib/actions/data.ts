@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 import { updateSession } from "../session";
 import {
   Conversation,
+  FormState,
   Friend,
   FriendList,
   FriendRequest,
@@ -15,6 +16,7 @@ import {
 } from "../definitions";
 import { Message } from "@/app/components/MessageBubble";
 import { formatMessageTimestamp, formatTimeAgo } from "../utils";
+import { revalidatePath } from "next/cache";
 
 export async function searchUsers(
   query: string,

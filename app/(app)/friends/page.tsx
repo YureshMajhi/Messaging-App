@@ -1,6 +1,6 @@
 "use client";
 
-import { searchUsers, showFriends } from "@/app/lib/actions/data";
+import { searchUsers, sendFriendRequest, showFriends } from "@/app/lib/actions/data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,23 +17,30 @@ export default function Friends() {
 
   const [friendsList, setFriendsList] = useState<Friend[]>([]);
 
+  const allFriendsList = async () => {
+    const res = await fetch("/api/friends");
+
+    if (!res.ok) return [];
+
+    const allFriends = await res.json();
+    setFriendsList(allFriends);
+  };
+
+  const newPeople = async () => {
+    const res = await fetch(`/api/users/search?query=${query}`);
+    if (!res.ok) return [];
+
+    const allPeople = await res.json();
+    setFriendsList(allPeople);
+  };
+
   useEffect(() => {
-    const friendsList = async () => {
-      const allFriends = await showFriends();
-      if (allFriends.length > 0) setFriendsList(allFriends);
-    };
-
-    const newPeople = async () => {
-      const allPeople = await searchUsers(query);
-      setFriendsList(allPeople);
-    };
-
     if (query) {
       newPeople();
       return;
     }
 
-    friendsList();
+    allFriendsList();
   }, [query]);
 
   return (
@@ -42,7 +49,7 @@ export default function Friends() {
         <TabsContent value="my-friends" className="space-y-4">
           {friendsList.length > 0 ? (
             friendsList.map((person, i) => (
-              <PeopleCard key={person.id + i} person={person} />
+              <PeopleCard key={person.id + i} person={person} newPeople={newPeople} />
             ))
           ) : (
             <div className="text-center py-12 text-muted-foreground">
@@ -55,7 +62,16 @@ export default function Friends() {
   );
 }
 
-function PeopleCard({ person }: { person: Friend }) {
+function PeopleCard({ person, newPeople }: { person: Friend; newPeople: () => void }) {
+  const handleClick = {
+    sendRequest: async (id: string) => {
+      const result = await sendFriendRequest(id);
+      if (result.message) {
+        newPeople();
+      }
+    },
+  };
+
   return (
     <Card className="hover-elevate">
       <CardContent className="p-4 flex items-center justify-between">
@@ -98,6 +114,8 @@ function PeopleCard({ person }: { person: Friend }) {
               variant="default"
               size="sm"
               data-testid={`button-add-friend-${person.id}`}
+              type="submit"
+              onClick={() => handleClick.sendRequest(person.id)}
             >
               <UserPlus className="w-4 h-4 mr-2" />
               Add Friend
