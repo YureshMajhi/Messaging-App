@@ -1,6 +1,6 @@
 "use client";
 
-import { searchUsers, sendFriendRequest, showFriends } from "@/app/lib/actions/data";
+import { acceptFriendRequest, sendFriendRequest } from "@/app/lib/actions/data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -49,7 +49,12 @@ export default function Friends() {
         <TabsContent value="my-friends" className="space-y-4">
           {friendsList.length > 0 ? (
             friendsList.map((person, i) => (
-              <PeopleCard key={person.id + i} person={person} newPeople={newPeople} />
+              <PeopleCard
+                key={person.id + i}
+                person={person}
+                newPeople={newPeople}
+                allFriendsList={allFriendsList}
+              />
             ))
           ) : (
             <div className="text-center py-12 text-muted-foreground">
@@ -62,12 +67,26 @@ export default function Friends() {
   );
 }
 
-function PeopleCard({ person, newPeople }: { person: Friend; newPeople: () => void }) {
+function PeopleCard({
+  person,
+  newPeople,
+  allFriendsList,
+}: {
+  person: Friend;
+  newPeople: () => void;
+  allFriendsList: () => void;
+}) {
   const handleClick = {
     sendRequest: async (id: string) => {
       const result = await sendFriendRequest(id);
       if (result.message) {
         newPeople();
+      }
+    },
+    acceptRequest: async (requestId: string, accept: boolean = true) => {
+      const result = await acceptFriendRequest(requestId, accept);
+      if (result?.message) {
+        allFriendsList();
       }
     },
   };
@@ -125,6 +144,7 @@ function PeopleCard({ person, newPeople }: { person: Friend; newPeople: () => vo
               variant="default"
               size="sm"
               data-testid={`button-accept-friend-${person.id}`}
+              onClick={() => handleClick.acceptRequest(person.requestId)}
             >
               <UserCheck className="w-4 h-4 mr-2" />
               Accept

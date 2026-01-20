@@ -138,6 +138,7 @@ export interface Conversation {
 type FriendStatus = "friend" | "requested" | "pending" | "none";
 export interface Friend {
   id: string;
+  requestId: string;
   name: String;
   username: String;
   avatar: string | null;

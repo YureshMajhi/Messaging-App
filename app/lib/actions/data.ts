@@ -108,6 +108,9 @@ export async function searchUsers(
                 default: "none",
               },
             },
+            requestId: {
+              $toString: "$friendRequest._id",
+            },
           },
         },
 
@@ -119,6 +122,7 @@ export async function searchUsers(
             name: "$username",
             avatar: null,
             status: 1,
+            requestId: 1,
           },
         },
       ])
@@ -190,8 +194,9 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
     const friendRequestExists = await db.collection("friendRequests").findOne({
       _id: new ObjectId(requestId),
     });
+
     if (!friendRequestExists) {
-      return { error: "USER_DOESNOT_EXIST" };
+      return { error: "REQUEST_DOESNOT_EXIST" };
     }
 
     if (friendRequestExists && !accept) {
@@ -279,6 +284,7 @@ export async function showFriends(): Promise<Friend[]> {
         {
           $project: {
             _id: 0,
+            requestId: { $toString: "_id" },
             id: { $toString: "$friend._id" },
             name: "$friend.username",
             username: "$friend.username",
