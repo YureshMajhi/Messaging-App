@@ -86,6 +86,12 @@ function PeopleCard({
     acceptRequest: async (requestId: string, accept: boolean = true) => {
       const result = await acceptFriendRequest(requestId, accept);
       if (result?.message) {
+        newPeople();
+      }
+    },
+    declineRequest: async (requestId: string, accept: boolean = false) => {
+      const result = await acceptFriendRequest(requestId, accept);
+      if (result?.message) {
         allFriendsList();
       }
     },
@@ -114,6 +120,7 @@ function PeopleCard({
               size="sm"
               className="text-destructive hover:bg-destructive/10"
               data-testid={`button-remove-friend-${person.id}`}
+              onClick={() => handleClick.declineRequest(person.requestId, false)}
             >
               <UserMinus className="w-4 h-4 mr-2" />
               Remove

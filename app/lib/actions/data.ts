@@ -284,7 +284,7 @@ export async function showFriends(): Promise<Friend[]> {
         {
           $project: {
             _id: 0,
-            requestId: { $toString: "_id" },
+            requestId: { $toString: "$_id" },
             id: { $toString: "$friend._id" },
             name: "$friend.username",
             username: "$friend.username",
