@@ -10,8 +10,11 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import AuthLayout from "@/app/components/authLayout/AuthLayout";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
+
   const [state, action, pending] = useActionState(signin, undefined);
 
   const [email, setEmail] = useState("");
@@ -40,6 +43,12 @@ export default function Login() {
         description: state.error,
         variant: "destructive",
       });
+    }
+
+    if (state?.message === "OK") {
+      router.push("/");
+      router.refresh();
+      return;
     }
   }, [state, toast]);
 

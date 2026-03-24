@@ -88,12 +88,14 @@ export async function signin(state: FormState, formData: FormData) {
     }
 
     await createSession(user._id.toString(), user.username);
+
+    return { message: "OK" };
   } catch (error) {
     console.error(error);
     return { error: "SOMETHING_WENT_WRONG" };
   }
 
-  redirect("/");
+  // redirect("/");
 }
 
 export async function signout() {

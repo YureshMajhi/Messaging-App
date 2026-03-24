@@ -15,7 +15,7 @@ export async function encrypt(payload: SessionPayload) {
 }
 
 export async function decrypt(
-  session: string | undefined = ""
+  session: string | undefined = "",
 ): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
@@ -35,7 +35,7 @@ export async function createSession(userId: string, userName: string) {
 
   cookieStore.set("session", session, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
