@@ -1,8 +1,5 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGO_URL || "";
-const options = {};
-
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
@@ -10,19 +7,21 @@ declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-if (!uri) {
-  console.log("Please add your MongoDB URI to .env");
-}
+export function getMongoClient() {
+  const uri = process.env.MONGO_URL;
 
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+  if (!uri) {
+    throw new Error("MONGO_URL is missing at runtime");
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-}
 
-export default clientPromise;
+  if (process.env.NODE_ENV === "development") {
+    if (!global._mongoClientPromise) {
+      client = new MongoClient(uri);
+      global._mongoClientPromise = client.connect();
+    }
+    return global._mongoClientPromise;
+  } else {
+    client = new MongoClient(uri);
+    return client.connect();
+  }
+}

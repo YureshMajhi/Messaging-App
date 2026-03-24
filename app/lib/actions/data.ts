@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { verifySession } from "../dal";
-import clientPromise from "../database/mongodb";
+// import clientPromise from "../database/mongodb";
+import { getMongoClient } from "../database/mongodb";
 import { ObjectId } from "mongodb";
 import { updateSession } from "../session";
 import {
@@ -27,7 +28,7 @@ export async function searchUsers(
   const session = await verifySession();
 
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const users = await db
@@ -142,7 +143,7 @@ export async function sendFriendRequest(receiverId: string) {
   await updateSession();
 
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const receiver = await db.collection("users").findOne({
@@ -188,7 +189,7 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
   await updateSession();
 
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const friendRequestExists = await db.collection("friendRequests").findOne({
@@ -247,7 +248,7 @@ export async function acceptFriendRequest(requestId: string, accept: boolean) {
 export async function showFriends(): Promise<Friend[]> {
   const session = await verifySession();
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const friends = await db
@@ -306,7 +307,7 @@ export async function showPendingRequests(): Promise<FriendRequest[]> {
   try {
     const session = await verifySession();
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const requests = await db
@@ -351,7 +352,7 @@ export async function fetchConversations(): Promise<Conversation[]> {
   try {
     const session = await verifySession();
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const conversations = await db
@@ -429,7 +430,7 @@ export async function sendMessage(prevState: any, formData: FormData) {
   try {
     const session = await verifySession();
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const conversations = await db.collection("conversations").findOneAndUpdate(
@@ -479,7 +480,7 @@ export async function fetchMessages(conversationId: string): Promise<Message[]> 
   try {
     const session = await verifySession();
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const rawMessages = await db

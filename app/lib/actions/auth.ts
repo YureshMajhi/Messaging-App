@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import clientPromise from "../database/mongodb";
+// import clientPromise from "../database/mongodb";
+import { getMongoClient } from "../database/mongodb";
 import { FormState, AuthFormSchema, OtpFormSchema } from "../definitions";
 import bcrypt from "bcrypt";
 import { createSession, deleteSession } from "../session";
@@ -24,7 +25,7 @@ export async function signup(state: FormState, formData: FormData) {
   const hashedPassword = await bcrypt.hash(password, 10);
   const date = new Date().toISOString().split("T")[0];
 
-  const client = await clientPromise;
+  const client = await getMongoClient();
   const db = client.db("authDB");
 
   const existing = await db.collection("users").findOne({ email });
@@ -73,7 +74,7 @@ export async function signin(state: FormState, formData: FormData) {
   try {
     const { email, password } = validatedFields.data;
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const user = await db.collection("users").findOne({ email });
@@ -118,7 +119,7 @@ export async function verifyOtp(state: FormState, formData: FormData) {
   try {
     const { email, otp } = validatedFields.data;
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("authDB");
 
     const user = await db.collection("users").findOne({ email });
@@ -137,7 +138,7 @@ export async function verifyOtp(state: FormState, formData: FormData) {
         .collection("users")
         .findOneAndUpdate(
           { email },
-          { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } }
+          { $unset: { otp: "", otpExpiry: "" }, $set: { isVerified: true } },
         );
     }
     return { message: "OK" };
