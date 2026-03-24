@@ -7,10 +7,15 @@ const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME ?? "0.0.0.0";
 const port = Number(process.env.PORT ?? 3000);
 
+console.log("Starting node process...");
+
 const app = next({ dev });
 const handler = app.getRequestHandler();
 
+console.log("Next.js app initialized, starting prepare()...");
+
 app.prepare().then(() => {
+  console.log("Preparing complete, starting http server...");
   const httpServer = createServer((req, res) => {
     const parsedUrl = parse(req.url!, true);
 
