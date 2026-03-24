@@ -11,10 +11,6 @@ declare global {
 }
 
 function getClientPromise() {
-  if (!uri) {
-    throw new Error("Missing MONGO_URL environment variable");
-  }
-
   if (process.env.NODE_ENV === "development") {
     if (!global._mongoClientPromise) {
       client = new MongoClient(uri, options);
